@@ -1,3 +1,5 @@
+import { FindManyOptions, FindOptionsWhere, ObjectID } from "typeorm"
+
 export interface Pagination_Options {
   offset?: string | number,
   limit?: string | number,
@@ -17,3 +19,5 @@ export interface Filter_Options extends Pagination_Options {
     [key: string]: any
   }
 }
+
+export type filterOption = string | number | FindOptionsWhere<any> | Date | ObjectID | string[] | number[] | Date[] | ObjectID[]

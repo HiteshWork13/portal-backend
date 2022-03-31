@@ -119,7 +119,7 @@ export class AdminController {
         }
     `})
     @UseGuards(JwtAuthGuard)
-    @Get('getAllAdminByRoleIdAndCreatedId')
+    @Post('getAllAdminByRoleIdAndCreatedId')
     async getAllAdminByRoleIdAndCreatedId(@Body() body: NewAdminUser, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `getAllAdminByRoleIdAndCreatedId body=${this.utils.beautify(body)}`);

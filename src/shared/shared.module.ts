@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtService } from './services/jwt.service';
 import { UtilsService } from './services/utils.service';
-import { BaseOperationService } from './services/base-operation.service';
 
 @Module({
     imports: [
@@ -10,7 +9,7 @@ import { BaseOperationService } from './services/base-operation.service';
             secret: process.env.JWT_ADMIN_TOKEN_SECRET
         }),
     ],
-    providers: [JwtService, UtilsService, BaseOperationService],
-    exports: [JwtService, UtilsService, JwtModule, BaseOperationService]
+    providers: [JwtService, UtilsService],
+    exports: [JwtService, UtilsService, JwtModule]
 })
 export class SharedModule { }
