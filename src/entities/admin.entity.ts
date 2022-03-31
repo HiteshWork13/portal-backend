@@ -38,7 +38,6 @@ export class AdminEntity {
 
     @BeforeInsert()
     async hashPassword() {
-        console.log("bcrypt.hash(this.password, 8)", await bcrypt.hash(this.password, 8));
         this.password = await bcrypt.hash(this.password, 8);
     }
 

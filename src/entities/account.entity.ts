@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { AdminEntity } from "./admin.entity";
+import * as bcrypt from 'bcrypt';
 
 
 @Entity('Account')
@@ -8,71 +10,64 @@ export class AccountEntity {
     id: Number;
 
     @Column({ collation: "default" })
-    code: String;
+    code: string;
 
     @Column({ collation: "default" })
-    firstname: String;
+    firstname: string;
 
     @Column({ collation: "default" })
-    lastname: String;
+    lastname: string;
 
     @Column({ collation: "default" })
-    companyname: String;
+    companyname: string;
 
     @Column({ collation: "default" })
-    phone: String;
+    phone: string;
 
     @Column({ collation: "default" })
-    address: String;
+    address: string;
 
     @Column({ collation: "default" })
-    postcode: String;
+    postcode: string;
 
     @Column({ collation: "default" })
-    country: String;
+    country: string;
 
     @Column({ collation: "default" })
-    billingemail: String;
+    billingemail: string;
 
     @Column({ collation: "default" })
-    customerid: String;
+    customerid: string;
 
     @Column({ collation: "default" })
-    vat: String;
+    vat: string;
 
-    @Column({ type: "timestamp", default: () => 'CURRENT_TIMESTAMP' })
-    created_at?: Date;;
-
-    @Column({ type: "timestamp", default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    updated_at?: Date;;
-
-
-    @Column({ default: 1 })
+    @Column({ type: "integer", default: 1 })
     packageid: Number;
 
-    @Column({ default: 0 })
+    @Column({ type: "integer", default: 0 })
     accounttype: Number;
 
-    @Column({ default: 0, nullable: false })
+    @Column({ type: "double precision", default: 0, nullable: false })
     credits: Number;
 
-    @Column({ default: false, nullable: false })
+    @Column({ type: "boolean", default: false, nullable: false })
     purchased: Boolean;
 
     @Column({ collation: "default", nullable: false })
-    password: String;
+    password: string;
 
     @Column({ collation: "default", nullable: false })
-    email: String;
+    email: string;
 
     @Column({ default: false })
     emailverified: Boolean;
 
     @Column({ collation: "default" })
-    verificationtoken: String;
+    verificationtoken: string;
 
     @Column({ collation: "default" })
-    city: String;
+    city: string;
 
     @Column({ default: 7 })
     triallimit: Number;
@@ -86,36 +81,84 @@ export class AccountEntity {
     @Column({ default: 1 })
     totaldevices: Number;
 
-    @Column({ default: 0 })
-    registrationtype: Number;
-
-    @Column({ type: "date" })
-    expirydate: Date;
-
-    @Column()
-    analyticsstatus: Boolean;
-
-    @Column({ default: 1, nullable: false })
-    packageid_dr: Number;
-
-    @Column({ type: "double precision", default: 0, nullable: false })
-    size_dr: Number;
-
-    @Column({ type: "integer", default: 1, nullable: false })
-    totaldevices_dr: Number;
-
-    @Column({ type: "date", default: () => 'CURRENT_DATE', nullable: false })
-    expirydate_dr: Date;
-
-    @Column({ type: "timestamp without time zone" })
-    purchasedate: Date;
-
-    @Column({ default: false })
+    @Column({ default: false, nullable: false })
     payasgo: Boolean;
 
-    @Column({ default: 1 })
+    @Column({ type: "integer", default: 1 })
     payid: Number;
+
+    @Column({ type: "timestamp without time zone", default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    purchasedate: Date;
+
+    @Column({ type: "integer", default: 0 })
+    registrationtype: Number;
+
+    @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
+    @Column()
+    created_by: string;
+
+    @Column({ collation: "default" })
+    enduser_street: string;
+
+    @Column({ collation: "default" })
+    enduser_state: string;
+
+    @Column({ collation: "default" })
+    enduser_email: string;
+
+    @Column({ collation: "default" })
+    reseller_company: string;
+
+    @Column({ collation: "default" })
+    reseller_street: string;
+
+    @Column({ collation: "default" })
+    reseller_state: string;
+
+    @Column({ collation: "default" })
+    reseller_code: string;
+
+    @Column({ collation: "default" })
+    reseller_firstname: string;
+
+    @Column({ collation: "default" })
+    reseller_lastname: string;
+
+    @Column({ collation: "default" })
+    enduser_classification: string;
+
+    @Column({ collation: "default" })
+    reseller_email: string;
+
+    @Column({ type: "date", default: () => 'NOW()' })
+    expirydate: Date;
+
+    @Column({ default: true })
+    analyticsstatus: Boolean;
+
+    @Column({ default: 1 })
+    packageid_dr: Number;
+
+    @Column({ type: "double precision", default: 0 })
+    size_dr: Number;
+
+    @Column({ type: "integer", default: 1 })
+    totaldevices_dr: Number;
+
+    @Column({ type: "date", default: () => 'NOW()' })
+    expirydate_dr: Date;
 
     @Column({ default: true })
     communicationstatus: Boolean;
+
+    @Column({ type: "timestamp", default: () => 'CURRENT_TIMESTAMP' })
+    created_at?: Date;
+
+    @Column({ type: "timestamp", default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updated_at?: Date;
+
+    @BeforeInsert()
+    async hashPassword() {
+        this.password = await bcrypt.hash(this.password, 8);
+    }
 }

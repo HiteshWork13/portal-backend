@@ -4,13 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { UtilsService } from './shared/services/utils.service';
-import { JwtService } from './shared/services/jwt.service';
 import { SharedModule } from './shared/shared.module';
-import { AuthController } from './modules/auth/auth.controller';
-import { JwtModule } from '@nestjs/jwt';
-import { AdminController } from './modules/admin/admin.controller';
 import { AdminModule } from './modules/admin/admin.module';
+import { AccountModule } from './modules/account/account.module';
 
 @Module({
   imports: [
@@ -28,7 +24,8 @@ import { AdminModule } from './modules/admin/admin.module';
     }),
     SharedModule,
     AuthModule,
-    AdminModule
+    AdminModule,
+    AccountModule
   ],
   controllers: [AppController],
   providers: [AppService],
