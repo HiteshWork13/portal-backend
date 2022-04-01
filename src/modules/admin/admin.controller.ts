@@ -148,8 +148,8 @@ export class AdminController {
         }
     `})
     @UseGuards(JwtAuthGuard)
-    @Delete('deleteAdminById')
-    async deleteAdminById(@Body() body: AdminUser, @Request() req, @Response() res) {
+    @Delete('deleteAdminById/:id')
+    async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `deleteAdminById body=${this.utils.beautify(req.body)}`);
             const currentAdmin = await this.adminService.FindAdminByEmailOnly(req.user.email);
@@ -158,9 +158,9 @@ export class AdminController {
                 [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
                 [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
             }
-            const toBeDeleteAdmin = await this.adminService.FindAdminById(body.id);
+            const toBeDeleteAdmin = await this.adminService.FindAdminById(id);
             if (admin_creation_access[currentAdmin['role']] && admin_creation_access[currentAdmin['role']].indexOf(toBeDeleteAdmin['role']) >= 0) {
-                const deleted = await this.adminService.DeleteAdminQuery(body.id).execute();
+                const deleted = await this.adminService.DeleteAdminQuery(id).execute();
                 logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
@@ -209,7 +209,7 @@ export class AdminController {
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
                     message: "Updated SuccessFully",
-                    data: updated
+                    data: { ...toBeUpdateAdmin, ...body, password: null }
                 })
             } else {
                 this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
