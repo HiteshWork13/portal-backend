@@ -1,9 +1,8 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AdminEntity } from 'src/entities/admin.entity';
-import { AdminUser, NewAdminUser, NewSuperAdminUser, UpdateAdminUser } from 'src/models/admin.interface';
+import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { AdminService } from './admin.service';
@@ -15,66 +14,49 @@ export class AdminController {
 
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            username: String
-            email: String
-            password: String
-            status?: 0 | 1   <== default : 1
-            role: 1
-            admin_secret: String
-        }
-    `})
+    @ApiBody({ type: CreateSuperAdminUser })
+    @ApiResponse({ type: AdminCreatedResponse })
     @Post('createSuperAdmin')
-    async createSuperAdmin(@Body() body: NewSuperAdminUser, @Request() req, @Response() res) {
+    async createSuperAdmin(@Body() body: CreateSuperAdminUser, @Response() res) {
         try {
             logger.log(level.info, `createSuperAdmin body=${this.utils.beautify(body)}`);
-            const input: NewAdminUser = { ...body };
+            const input: CreateSuperAdminUser = { ...body };
             input['created_by'] = null;
             if (body.admin_secret == process.env.ADMIN_SECRET) {
-                const inserted = await this.adminService.CreateAdmin(input);
+                const inserted: AdminUser = await this.adminService.CreateAdmin(input);
+                delete inserted.password;
                 logger.log(level.info, `New Super Admin Created : ${this.utils.beautify(inserted)}`);
                 return this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
+                    statusCode: HttpStatus.OK,
                     message: "Super Admin Created Successfully",
                     data: inserted
                 });
             } else {
                 return this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
-                    success: true,
-                    message: "Access Denied",
+                    success: false,
+                    statusCode: HttpStatus.FORBIDDEN,
+                    message: ERROR_CONST.DOES_NOT_HAVE_ACCESS,
                     data: null
                 });
             }
-
         } catch (error) {
             logger.log(level.error, `createAdminUser Error=error`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });
         }
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            username: String
-            email: String
-            password: String
-            status?: 0 | 1   <== default : 1
-            role: 1 | 2 | 3  
-                1: super admin,
-                2: admin
-                3: sub admin
-            created_by?: <String Id>
-        }
-    `})
+    @ApiBody({ type: CreateAdminUser })
+    @ApiResponse({ type: AdminCreatedResponse })
+    @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('createAdminUser')
-    async createAdminUser(@Body() body: NewAdminUser, @Request() req, @Response() res) {
+    async createAdminUser(@Body() body: CreateAdminUser, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `createAdminUser body=${this.utils.beautify(body)}`);
             const currentAdmin: AdminUser = await this.adminService.FindAdminByEmailOnly(req.user.email);
@@ -83,10 +65,11 @@ export class AdminController {
                 [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
                 [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
             }
-            const input: NewAdminUser = body;
+            const input: CreateAdminUser = body;
             input.created_by = currentAdmin['id'];
             if (admin_creation_access[currentAdmin['role']] && admin_creation_access[currentAdmin['role']].indexOf(input['role']) >= 0) {
                 const inserted = await this.adminService.CreateAdmin(input);
+                delete inserted.password;
                 logger.log(level.info, `New Admin Created : ${this.utils.beautify(inserted)}`);
                 return this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
@@ -111,16 +94,12 @@ export class AdminController {
         }
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            role : 1 | 2 | 3,
-            created_by ?: <string_id>
-        }
-    `})
+    @ApiBody({ type: RoleIdAndCreateBy })
+    @ApiResponse({ type: AdminUser })
+    @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('getAllAdminByRoleIdAndCreatedId')
-    async getAllAdminByRoleIdAndCreatedId(@Body() body: NewAdminUser, @Request() req, @Response() res) {
+    async getAllAdminByRoleIdAndCreatedId(@Body() body: RoleIdAndCreateBy, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `getAllAdminByRoleIdAndCreatedId body=${this.utils.beautify(body)}`);
             const list = await this.adminService.FindAdminByRoleIdAndCreatedId(req.body['role'], req.body['created_by']).execute();
@@ -141,12 +120,9 @@ export class AdminController {
         }
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            id: string
-        }
-    `})
+    @ApiParam({ name: 'id' })
+    @ApiResponse({ type: AdminDeletedResponse })
+    @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Delete('deleteAdminById/:id')
     async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) {
@@ -164,12 +140,14 @@ export class AdminController {
                 logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
+                    statusCode: HttpStatus.OK,
                     message: "Deleted SuccessFully",
-                    data: deleted
+                    data: {}
                 })
             } else {
                 this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
                     success: false,
+                    statusCode: HttpStatus.FORBIDDEN,
                     message: ERROR_CONST.DOES_NOT_HAVE_ACCESS,
                     data: {}
                 });
@@ -179,18 +157,17 @@ export class AdminController {
             logger.log(level.error, `deleteAdminById Error=error`);
             this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });
         }
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            username: string
-        }
-    `})
+    @ApiParam({ name: 'id' })
+    @ApiBody({ type: UpdateAdminUser })
+    @ApiResponse({ type: AdminUpdatedResponse })
+    @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Put('updateAdminById/:id')
     async updateAdminById(@Param('id') param, @Body() body: UpdateAdminUser, @Request() req, @Response() res) {
@@ -208,12 +185,14 @@ export class AdminController {
                 logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
+                    statusCode: HttpStatus.OK,
                     message: "Updated SuccessFully",
                     data: { ...toBeUpdateAdmin, ...body, password: null }
                 })
             } else {
                 this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
                     success: false,
+                    statusCode: HttpStatus.FORBIDDEN,
                     message: ERROR_CONST.DOES_NOT_HAVE_ACCESS,
                     data: {}
                 });
@@ -223,6 +202,7 @@ export class AdminController {
             logger.log(level.error, `updateAdminById Error=error`);
             this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });

@@ -1,10 +1,9 @@
-import { Body, Controller, HttpStatus, Post, Request, Response, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Request, Response, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
-import { ERROR_CONST, JWT_CONST } from 'src/constants';
-import { AdminLogin, NewAdminUser } from 'src/models/admin.interface';
-import { JwtService } from 'src/shared/services/jwt.service';
+import { ERROR_CONST } from 'src/constants';
+import { Login, LoginResponse } from 'src/models/admin.model';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { AuthService } from './auth.service';
 
@@ -15,20 +14,16 @@ export class AuthController {
 
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            username: String
-            password: String
-        }
-    `})
+    @ApiBody({ type: Login })
+    @ApiResponse({ type: LoginResponse })
     @UseGuards(AuthGuard('local'))
     @Post('adminLogin')
-    async adminLogin(@Body() body: AdminLogin, @Request() req, @Response() res) {
+    async adminLogin(@Body() body: Login, @Request() req, @Response() res) {
         try {
-            const data = await this.authService.login(req.user)
+            const data = await this.authService.login(req.user);
             return this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
+                statusCode: HttpStatus.OK,
                 message: "Login Successfully",
                 data
             });
@@ -36,6 +31,7 @@ export class AuthController {
             logger.log(level.error, `adminLogin Error=${error}`);
             this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });

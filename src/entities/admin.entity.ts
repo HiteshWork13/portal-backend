@@ -1,5 +1,4 @@
 
-import { adminRoles, adminStaus } from "src/models/admin.interface";
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
 
@@ -21,7 +20,7 @@ export class AdminEntity {
     status: 0 | 1
 
     @Column({ type: "int", nullable: false })
-    role: adminRoles
+    role: 1 | 2 | 3
 
     @Column({ nullable: true })
     created_by?: string;

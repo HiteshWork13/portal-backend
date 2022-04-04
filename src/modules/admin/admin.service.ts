@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from 'src/entities/admin.entity';
-import { AdminUser } from 'src/models/admin.interface';
+import { AdminUser } from 'src/models/admin.model';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -13,13 +13,13 @@ export class AdminService {
 
     }
 
-    FindAdminByEmailOnly(email): AdminUser {
-        return <AdminUser>this.Admin.findOne({ where: { email } })
+    FindAdminByEmailOnly(email): any {
+        return this.Admin.findOne({ where: { email } })
     }
 
-    async CreateAdmin(inputData) {
+    async CreateAdmin(inputData): Promise<AdminUser> {
         try {
-            const user = this.Admin.create(inputData)
+            const user: any = this.Admin.create(inputData)
             await this.Admin.save(user);
             return user
         } catch (error) {
