@@ -33,12 +33,14 @@ export class AdminService {
                 .select("id, username, email, role, status, created_by, created_at, updated_at")
                 .where('role = :role', { role })
                 .andWhere('created_by = :created_by', { created_by })
+                .andWhere('status = :status', { status: 1 })
                 .orderBy('email', 'ASC')
                 .orderBy('username', 'DESC')
         } else {
             return this.Admin.createQueryBuilder()
                 .select("id, username, email, role, status, created_by, created_at, updated_at")
                 .where('role = :role', { role })
+                .andWhere('status = :status', { status: 1 })
                 .orderBy('email', 'ASC')
                 .orderBy('username', 'DESC')
         }
