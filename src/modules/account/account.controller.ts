@@ -14,17 +14,7 @@ export class AccountController {
 
     }
 
-    @ApiBody({
-        description: `
-        body: {
-            username: String
-            email: String
-            password: String
-            status?: 0 | 1   <== default : 1
-            role: 1
-            admin_secret: String
-        }
-    `})
+    @ApiBody({})
     @UseGuards(JwtAuthGuard)
     @Post('createAccount')
     async createAccount(@Body() body: CreateAccount, @Request() req, @Response() res) {
