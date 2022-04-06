@@ -1,6 +1,5 @@
 import { BadGatewayException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { filterOption } from 'src/models/db_operation.interface';
 import { DeleteResult, EntitySchema, EntityTarget, FindManyOptions, FindOneOptions, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
@@ -9,7 +8,7 @@ export class BaseOperationService<T> {
     constructor(private readonly genericRepository: Repository<T>) { }
 
     private _wrapSimpleQuery(conditions, select_fields: Array<T> = [], excluded_fields: Array<T> = []) {
-        const query: filterOption = {}
+        const query: any = {}
         if (select_fields.length >= 0) {
             query['select'] = select_fields.reduce((result: any, field) => {
                 result[field] = excluded_fields.indexOf(field) < 0;

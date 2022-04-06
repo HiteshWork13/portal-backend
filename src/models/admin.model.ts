@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from "@nestjs/swagger";
 import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString } from "class-validator"
 import { defaults } from "src/constants/documentation_default_values.const";
+import { Pagination_Options } from "./db_operation.model";
 
 class Response {
 
@@ -92,7 +93,7 @@ export class UpdateAdminUser {
     username: string;
 }
 
-export class RoleIdAndCreateBy {
+export class RoleIdAndCreateBy extends Pagination_Options {
     @ApiProperty({ example: defaults.role })
     @IsIn([1, 2, 3])
     role: number;

@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, R
 import { ApiBody } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { CreateAccount } from 'src/models/account.interface';
+import { CreateAccount } from 'src/models/account.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { AccountService } from './account.service';
@@ -14,7 +14,7 @@ export class AccountController {
 
     }
 
-    @ApiBody({})
+    @ApiBody({ type: CreateAccount })
     @UseGuards(JwtAuthGuard)
     @Post('createAccount')
     async createAccount(@Body() body: CreateAccount, @Request() req, @Response() res) {

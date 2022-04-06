@@ -14,5 +14,8 @@ export const defaults = {
     successResponseMessage_Get: "Fetched Successfully",
     successResponseMessage_Delete: "Deleted Successfully",
     successResponseMessage_Update: "Updated Successfully",
-    emptyData: "..."
+    emptyData: "...",
+    page_offset: 10,
+    page_limit: 30,
+    order: { username: "ASC" }
 };

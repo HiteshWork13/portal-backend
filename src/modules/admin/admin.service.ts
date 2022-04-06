@@ -27,23 +27,33 @@ export class AdminService {
         }
     }
 
-    FindAdminByRoleIdAndCreatedId = (role, created_by: any = null) => {
-        if (created_by) {
-            return this.Admin.createQueryBuilder()
-                .select("id, username, email, role, status, created_by, created_at, updated_at")
-                .where('role = :role', { role })
-                .andWhere('created_by = :created_by', { created_by })
-                .andWhere('status = :status', { status: 1 })
-                .orderBy('email', 'ASC')
-                .orderBy('username', 'DESC')
-        } else {
-            return this.Admin.createQueryBuilder()
-                .select("id, username, email, role, status, created_by, created_at, updated_at")
-                .where('role = :role', { role })
-                .andWhere('status = :status', { status: 1 })
-                .orderBy('email', 'ASC')
-                .orderBy('username', 'DESC')
+    FindAdminByRoleIdAndCreatedId = (filter) => {
+        var query = this.Admin.createQueryBuilder()
+            .select("id, username, email, role, status, created_by, created_at, updated_at")
+            .where('role = :role', { role: filter['role'] })
+            .andWhere('status = :status', { status: 1 })
+
+        if ('created_by' in filter && filter.created_by) {
+            query = query.andWhere('created_by = :created_by', { created_by: filter['created_by'] })
         }
+
+        if ('offset' in filter && filter.offset) {
+            query = query.offset(filter['offset'])
+        }
+
+        if ('limit' in filter && filter.limit) {
+            query = query.limit(filter['limit'])
+        }
+
+        if ('order' in filter && filter.order) {
+            Object.keys(filter.order).forEach(key => {
+                if (key in filter.order) {
+                    query = query.orderBy(key, filter.order[key])
+                }
+            })
+        }
+
+        return query;
     }
 
     FindAdminById(id) {
