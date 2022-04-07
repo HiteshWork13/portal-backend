@@ -1,148 +1,215 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { IsBoolean, IsDate, IsEmail, IsNumber, IsString, MaxLength } from "class-validator";
+import { defaults } from "src/constants/documentation_default_values.const";
 
 export class CreateAccount {
     @IsString()
-    @ApiProperty()
+    @ApiProperty({ example: defaults.code })
     code: String;
 
-
-    @ApiProperty()
+    @IsString()
+    @MaxLength(100)
+    @ApiProperty({ example: defaults.firstName })
     firstname: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(100)
+    @ApiProperty({ example: defaults.lastname })
     lastname: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(250)
+    @ApiProperty({ example: defaults.companyname })
     companyname: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(20)
+    @ApiProperty({ example: defaults.phone })
     phone: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(400)
+    @ApiProperty({ example: defaults.address })
     address: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(10)
+    @ApiProperty({ example: defaults.postcode })
     postcode: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(100)
+    @ApiProperty({ example: defaults.country })
     country: String;
 
-    @ApiProperty()
+    @IsEmail()
+    @MaxLength(100)
+    @ApiProperty({ example: defaults.billingemail })
     billingemail: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(100)
+    @ApiProperty({ example: defaults.customerid })
     customerid: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(300)
+    @ApiProperty({ example: defaults.vat })
     vat: String;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.packageid })
     packageid: Number;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.accounttype })
     accounttype: Number;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.credits })
     credits: Number;
 
-    @ApiProperty()
+    @IsBoolean()
+    @ApiProperty({ example: defaults.purchased })
     purchased: Boolean;
 
-    @ApiProperty()
+    @IsString()
+    @ApiProperty({ example: defaults.password })
     password: String;
 
-    @ApiProperty()
+    @IsEmail()
+    @ApiProperty({ example: defaults.email })
     email: String;
 
-    @ApiProperty()
+    @IsBoolean()
+    @ApiProperty({ example: defaults.emailverified })
     emailverified: Boolean;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     verificationtoken: String;
 
-    @ApiProperty()
+    @IsString()
+    @MaxLength(100)
+    @ApiProperty({ example: defaults.city })
     city: String;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.triallimit })
     triallimit: Number;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.ac_role })
     role: Number;
 
-    @ApiProperty()
+    @IsBoolean()
+    @ApiProperty({ example: defaults.twofactor })
     twofactor: Boolean;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.totaldevices })
     totaldevices: Number;
 
-    @ApiProperty()
+    @IsBoolean()
+    @ApiProperty({ example: defaults.payasgo })
     payasgo: Boolean;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.payid })
     payid: Number;
 
-    @ApiProperty()
+    @IsDate()
+    @ApiProperty({ example: defaults.purchasedate })
     purchasedate: Date;
 
+    @IsNumber()
     @ApiProperty()
     registrationtype: Number;
 
-    @ApiProperty()
+    @IsString()
+    @ApiProperty({ example: defaults.createdBy })
     created_by: String;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     enduser_street: String;
 
+    @IsString()
+    @MaxLength(100)
     @ApiProperty()
     enduser_state: String;
 
+    @IsEmail()
     @ApiProperty()
     enduser_email: String;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     reseller_company: String;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     reseller_street: String;
 
+    @IsString()
+    @MaxLength(200)
     @ApiProperty()
     reseller_state: String;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     reseller_code: String;
 
+    @IsString()
+    @MaxLength(100)
     @ApiProperty()
     reseller_firstname: String;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     reseller_lastname: String;
 
+    @IsString()
+    @MaxLength(300)
     @ApiProperty()
     enduser_classification: String;
 
+    @IsEmail()
     @ApiProperty()
     reseller_email: String;
 
-    @ApiProperty()
+    @IsDate()
+    @ApiProperty({ example: defaults.expirydate })
     expirydate: Date;
 
-    @ApiProperty()
+    @IsBoolean()
+    @ApiProperty({ example: defaults.analyticsstatus })
     analyticsstatus: Boolean;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.packageid_dr })
     packageid_dr: Number;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.size_dr })
     size_dr: Number;
 
-    @ApiProperty()
+    @IsNumber()
+    @ApiProperty({ example: defaults.totaldevices_dr })
     totaldevices_dr: Number;
 
-    @ApiProperty()
+    @IsDate()
+    @ApiProperty({ example: defaults.expirydate_dr })
     expirydate_dr: Date;
 
-    @ApiProperty()
+    @IsBoolean()
+    @ApiProperty({ example: defaults.communicationstatus })
     communicationstatus: Boolean;
 
 }
