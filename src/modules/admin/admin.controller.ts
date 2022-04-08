@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, R
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminUser } from 'src/models/admin.model';
+import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminStatus, UpdateAdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { AdminService } from './admin.service';
@@ -41,7 +41,7 @@ export class AdminController {
                 });
             }
         } catch (error) {
-            logger.log(level.error, `createAdminUser Error=error`);
+            logger.log(level.error, `createAdminUser Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -85,7 +85,7 @@ export class AdminController {
             }
 
         } catch (error) {
-            logger.log(level.error, `createAdminUser Error=error`);
+            logger.log(level.error, `createAdminUser Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
@@ -118,7 +118,7 @@ export class AdminController {
             })
 
         } catch (error) {
-            logger.log(level.error, `getAllAdminByRoleIdAndCreatedId Error=error`);
+            logger.log(level.error, `getAllAdminByRoleIdAndCreatedId Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
@@ -177,24 +177,23 @@ export class AdminController {
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Delete('deleteAdminById/:id')
-    async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) {
+    async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) { 
         try {
             logger.log(level.info, `deleteAdminById body=${this.utils.beautify(req.body)}`);
             const currentAdmin = await this.adminService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const admin_creation_access = {
-                [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
-                [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
+                [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE]
             }
             const toBeDeleteAdmin = await this.adminService.FindAdminById(id);
-            if (admin_creation_access[currentAdmin['role']] && admin_creation_access[currentAdmin['role']].indexOf(toBeDeleteAdmin['role']) >= 0) {
+            if (toBeDeleteAdmin && admin_creation_access[currentAdmin['role']] && admin_creation_access[currentAdmin['role']].indexOf(toBeDeleteAdmin['role']) >= 0) {
                 const deleted = await this.adminService.DeleteAdminQuery(id).execute();
                 logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,
                     statusCode: HttpStatus.OK,
                     message: "Deleted SuccessFully",
-                    data: {}
+                    data: deleted
                 })
             } else {
                 this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
@@ -206,7 +205,52 @@ export class AdminController {
             }
         } catch (error) {
 
-            logger.log(level.error, `deleteAdminById Error=error`);
+            logger.log(level.error, `deleteAdminById Error=${error}`);
+            this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiParam({ name: 'id' })
+    @ApiBody({ type: UpdateAdminStatus })
+    @ApiResponse({ type: AdminUpdatedResponse })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Put('updateStatusById/:id')
+    async updateStatusById(@Param('id') param, @Body() body: UpdateAdminStatus, @Request() req, @Response() res) {
+        try {
+            logger.log(level.info, `updateStatusById body=${this.utils.beautify(body)}, param=${this.utils.beautify(param)}`);
+            const currentAdmin = await this.adminService.FindAdminByEmailOnly(req.user.email);
+            logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
+            const admin_updation_access = {
+                [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
+                [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
+            }
+            const toBeUpdateAdmin = await this.adminService.FindAdminById(param);
+            if (toBeUpdateAdmin && admin_updation_access[currentAdmin['role']] && admin_updation_access[currentAdmin['role']].indexOf(toBeUpdateAdmin['role']) >= 0) {
+                const updated = await this.adminService.UpdateAdminQuery(param, body);
+                logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
+                this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    success: true,
+                    statusCode: HttpStatus.OK,
+                    message: "Status Updated SuccessFully",
+                    data: { ...toBeUpdateAdmin, ...body, password: null }
+                })
+            } else {
+                this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
+                    success: false,
+                    statusCode: HttpStatus.FORBIDDEN,
+                    message: ERROR_CONST.DOES_NOT_HAVE_ACCESS,
+                    data: {}
+                });
+            }
+        } catch (error) {
+
+            logger.log(level.error, `updateStatusById Error=${error}`);
             this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

@@ -31,7 +31,6 @@ export class AdminService {
         var query = this.Admin.createQueryBuilder()
             .select("id, username, email, role, status, created_by, created_at, updated_at")
             .where('role = :role', { role: filter['role'] })
-            .andWhere('status = :status', { status: 1 })
 
         if ('created_by' in filter && filter.created_by) {
             query = query.andWhere('created_by = :created_by', { created_by: filter['created_by'] })
@@ -62,8 +61,8 @@ export class AdminService {
 
     DeleteAdminQuery(id) {
         return this.Admin.createQueryBuilder()
-            .update('Admin')
-            .set({ 'status': 0 })
+            .delete()
+            .from('Admin')
             .where('id = :id', { id })
     }
 
