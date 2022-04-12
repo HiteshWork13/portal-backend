@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsDate, IsEmail, IsNumber, IsString, MaxLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsBoolean, IsDate, IsDateString, IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { defaults } from "src/constants/documentation_default_values.const";
 
 export class CreateAccount {
@@ -119,7 +119,7 @@ export class CreateAccount {
     @ApiProperty({ example: defaults.payid })
     payid: Number;
 
-    @IsDate()
+    @IsDateString()
     @ApiProperty({ example: defaults.purchasedate })
     purchasedate: Date;
 
@@ -184,7 +184,7 @@ export class CreateAccount {
     @ApiProperty()
     reseller_email: String;
 
-    @IsDate()
+    @IsDateString()
     @ApiProperty({ example: defaults.expirydate })
     expirydate: Date;
 
@@ -204,7 +204,7 @@ export class CreateAccount {
     @ApiProperty({ example: defaults.totaldevices_dr })
     totaldevices_dr: Number;
 
-    @IsDate()
+    @IsDateString()
     @ApiProperty({ example: defaults.expirydate_dr })
     expirydate_dr: Date;
 
@@ -212,4 +212,18 @@ export class CreateAccount {
     @ApiProperty({ example: defaults.communicationstatus })
     communicationstatus: Boolean;
 
+}
+
+export class AccountUser extends CreateAccount {
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.adminId })
+    id: string;
+
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.createdAt })
+    created_at: string;
+
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.updatedAt })
+    updated_at: string
 }

@@ -4,13 +4,14 @@ import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
 import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminStatus, UpdateAdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
+import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
 export class AdminController {
 
-    constructor(private adminService: AdminService, private utils: UtilsService) {
+    constructor(private adminService: AdminService, private utils: UtilsService, private queryService: QueryService) {
 
     }
 
@@ -59,7 +60,7 @@ export class AdminController {
     async createAdminUser(@Body() body: CreateAdminUser, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `createAdminUser body=${this.utils.beautify(body)}`);
-            const currentAdmin: AdminUser = await this.adminService.FindAdminByEmailOnly(req.user.email);
+            const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const admin_creation_access = {
                 [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
@@ -136,7 +137,7 @@ export class AdminController {
     async updateAdminById(@Param('id') param, @Body() body: UpdateAdminUser, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `updateAdminById body=${this.utils.beautify(body)}, param=${this.utils.beautify(param)}`);
-            const currentAdmin = await this.adminService.FindAdminByEmailOnly(req.user.email);
+            const currentAdmin = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const admin_updation_access = {
                 [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
@@ -180,7 +181,7 @@ export class AdminController {
     async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) { 
         try {
             logger.log(level.info, `deleteAdminById body=${this.utils.beautify(req.body)}`);
-            const currentAdmin = await this.adminService.FindAdminByEmailOnly(req.user.email);
+            const currentAdmin = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const admin_creation_access = {
                 [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE]
@@ -224,7 +225,7 @@ export class AdminController {
     async updateStatusById(@Param('id') param, @Body() body: UpdateAdminStatus, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `updateStatusById body=${this.utils.beautify(body)}, param=${this.utils.beautify(param)}`);
-            const currentAdmin = await this.adminService.FindAdminByEmailOnly(req.user.email);
+            const currentAdmin = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const admin_updation_access = {
                 [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],

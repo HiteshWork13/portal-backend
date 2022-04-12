@@ -13,9 +13,9 @@ export class AdminService {
 
     }
 
-    FindAdminByEmailOnly(email): any {
+    /* FindAdminByEmailOnly(email): any {
         return this.Admin.findOne({ where: { email } })
-    }
+    } */
 
     async CreateAdmin(inputData): Promise<AdminUser> {
         try {
