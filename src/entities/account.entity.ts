@@ -9,7 +9,7 @@ export class AccountEntity {
     @PrimaryGeneratedColumn('uuid')
     id: Number;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     code: string;
 
     @Column({ collation: "default" })
@@ -21,10 +21,10 @@ export class AccountEntity {
     @Column({ collation: "default" })
     companyname: string;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     phone: string;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     address: string;
 
     @Column({ collation: "default" })
@@ -36,10 +36,10 @@ export class AccountEntity {
     @Column({ collation: "default" })
     billingemail: string;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     customerid: string;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     vat: string;
 
     @Column({ type: "integer", default: 1 })
@@ -63,10 +63,10 @@ export class AccountEntity {
     @Column({ default: false })
     emailverified: Boolean;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     verificationtoken: string;
 
-    @Column({ collation: "default" })
+    @Column({ collation: "default", nullable: true })
     city: string;
 
     @Column({ default: 7 })
@@ -96,6 +96,7 @@ export class AccountEntity {
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
     @Column()
     created_by: string;
+    
 
     @Column({ collation: "default" })
     enduser_street: string;

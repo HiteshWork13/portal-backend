@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AccountUser, CreateAccount } from 'src/models/account.model';
+import { AccountUser, CreateAccount, CreateBy } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
@@ -18,6 +18,7 @@ export class AccountController {
     }
 
     @ApiBody({ type: CreateAccount })
+    @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('createAccount')
     async createAccount(@Body() body: CreateAccount, @Request() req, @Response() res) {
@@ -38,7 +39,73 @@ export class AccountController {
             });
 
         } catch (error) {
-            logger.log(level.error, `createAccount Error=error`);
+            logger.log(level.error, `createAccount Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiBody({ type: CreateBy })
+    @ApiResponse({ type: AccountUser })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Post('getAllAccountsByCreatedId')
+    async getAllAccountsByCreatedId(@Body() body: CreateBy, @Response() res) {
+        try {
+            logger.log(level.info, `getAllAccountsByCreatedId body=${this.utils.beautify(body)}`);
+            const filter = {
+                "created_by": body['created_by'],
+                "offset": body['offset'],
+                "limit": body['limit'],
+                "order": body['order'],
+            }
+            const list = await this.accountService.FindAccountByCreatedId(filter).execute();
+            logger.log(level.info, `Account List: ${this.utils.beautify(list)}`);
+            delete list['password'];
+            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                success: true,
+                message: "Fetched SuccessFully",
+                data: list
+            })
+
+        } catch (error) {
+            logger.log(level.error, `getAllAccountsByCreatedId Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+    
+    @ApiBody({ type: CreateBy })
+    @ApiResponse({ type: AccountUser })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Post('getAllAccounts')
+    async getAllAccounts(@Body() body: CreateBy, @Response() res) {
+        try {
+            logger.log(level.info, `getAllAccounts body=${this.utils.beautify(body)}`);
+            const filter = {
+                "created_by": body['created_by'],
+                "offset": body['offset'],
+                "limit": body['limit'],
+                "order": body['order'],
+            }
+            const list = await this.accountService.GetAccounts(filter);
+            logger.log(level.info, `Account List: ${this.utils.beautify(list)}`);
+            delete list['password'];
+            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                success: true,
+                message: "Fetched SuccessFully",
+                data: list
+            })
+
+        } catch (error) {
+            logger.log(level.error, `getAllAccounts Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,

@@ -163,7 +163,7 @@ export class AdminController {
             }
         } catch (error) {
 
-            logger.log(level.error, `updateAdminById Error=error`);
+            logger.log(level.error, `updateAdminById Error=${error}`);
             this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
