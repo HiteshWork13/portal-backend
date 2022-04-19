@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { AdminEntity } from "./admin.entity";
 import * as bcrypt from 'bcrypt';
 
@@ -93,10 +93,12 @@ export class AccountEntity {
     @Column({ type: "integer", default: 0 })
     registrationtype: Number;
 
-    @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
     @Column()
-    created_by: string;
+    created_by_id: AdminEntity;
     
+    @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
+    @JoinColumn({ name: "created_by_id" })
+    created_by: AdminEntity;
 
     @Column({ collation: "default" })
     enduser_street: string;

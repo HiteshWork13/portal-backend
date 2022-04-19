@@ -1,6 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, OmitType } from "@nestjs/swagger";
 import { IsBoolean, IsDate, IsDateString, IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { defaults } from "src/constants/documentation_default_values.const";
+import { AdminUser } from "./admin.model";
 import { Pagination_Options } from "./db_operation.model";
 
 export class CreateAccount {
@@ -159,7 +160,7 @@ export class CreateAccount {
     @IsString()
     @IsOptional()
     @ApiProperty({ example: defaults.createdBy })
-    created_by: String;
+    created_by_id: String;
 
     @IsString()
     @IsOptional()
@@ -273,12 +274,16 @@ export class AccountUser extends CreateAccount {
 
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.updatedAt })
-    updated_at: string
+    updated_at: string;
+
+    @IsOptional()
+    @ApiPropertyOptional({ type: OmitType(AdminUser, ["access_token", 'password']) })
+    created_by: any
 }
 
 export class CreateBy extends Pagination_Options {
     @IsString()
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })
-    created_by: string;
+    created_by_id: string;
 }

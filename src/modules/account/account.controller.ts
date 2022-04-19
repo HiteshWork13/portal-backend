@@ -18,6 +18,7 @@ export class AccountController {
     }
 
     @ApiBody({ type: CreateAccount })
+    @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('createAccount')
@@ -27,9 +28,10 @@ export class AccountController {
             const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const input: CreateAccount = body;
-            input.created_by = currentAdmin['id'];
+            input.created_by_id = currentAdmin['id'];
             const inserted: AccountUser = await this.accountService.CreateAccount(input);
             delete inserted.password;
+            delete inserted['created_by']['password'];
             logger.log(level.info, `New Account Created : ${this.utils.beautify(inserted)}`);
             return this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
@@ -48,7 +50,7 @@ export class AccountController {
         }
     }
 
-    @ApiBody({ type: CreateBy })
+    @ApiBody({ type: CreateBy, description: "created_by_id can be any ID" })
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
@@ -57,18 +59,18 @@ export class AccountController {
         try {
             logger.log(level.info, `getAllAccountsByCreatedId body=${this.utils.beautify(body)}`);
             const filter = {
-                "created_by": body['created_by'],
+                "created_by_id": body['created_by_id'],
                 "offset": body['offset'],
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            const list = await this.accountService.FindAccountByCreatedId(filter).execute();
-            logger.log(level.info, `Account List: ${this.utils.beautify(list)}`);
-            delete list['password'];
+            const accounts = await this.accountService.FindAccountByCreatedId(filter);
+            logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
+            accounts.map(account => delete account['password']);
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 message: "Fetched SuccessFully",
-                data: list
+                data: accounts
             })
 
         } catch (error) {
@@ -80,32 +82,32 @@ export class AccountController {
             });
         }
     }
-    
-    @ApiBody({ type: CreateBy })
+
+    @ApiBody({ type: CreateBy, description: "created_by_id can be any Admin Id (Role: 2)" })
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
-    @Post('getAllAccounts')
-    async getAllAccounts(@Body() body: CreateBy, @Response() res) {
+    @Post('getAccountsByAdminAndSubAdmin')
+    async getAccountsByAdminAndSubAdmin(@Body() body: CreateBy, @Response() res) {
         try {
-            logger.log(level.info, `getAllAccounts body=${this.utils.beautify(body)}`);
+            logger.log(level.info, `getAccountsByAdminAndSubAdmin body=${this.utils.beautify(body)}`);
             const filter = {
-                "created_by": body['created_by'],
+                "created_by_id": body['created_by_id'],
                 "offset": body['offset'],
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            const list = await this.accountService.GetAccounts(filter);
-            logger.log(level.info, `Account List: ${this.utils.beautify(list)}`);
-            delete list['password'];
+            const accounts = await this.accountService.getAccountsByAdminAndSubAdmin(filter);
+            logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
+            accounts.map(account => delete account['created_by']['password']);
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 message: "Fetched SuccessFully",
-                data: list
+                data: accounts
             })
 
         } catch (error) {
-            logger.log(level.error, `getAllAccounts Error=${error}`);
+            logger.log(level.error, `getAccountsByAdminAndSubAdmin Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
