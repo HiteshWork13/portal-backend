@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AccountUser, CreateAccount, CreateBy, UpdateAccountUser } from 'src/models/account.model';
+import { AccountCreatedResponse, AccountDeletedResponse, AccountUpdatedResponse, AccountUser, CreateAccount, CreateBy, UpdateAccountUser } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
@@ -18,7 +18,7 @@ export class AccountController {
     }
 
     @ApiBody({ type: CreateAccount })
-    @ApiResponse({ type: AccountUser })
+    @ApiResponse({ type: AccountCreatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('createAccount')
@@ -50,8 +50,9 @@ export class AccountController {
         }
     }
 
+    @ApiParam({ name: 'id' })
     @ApiBody({ type: UpdateAccountUser })
-    @ApiResponse({ type: AccountUser })
+    @ApiResponse({ type: AccountUpdatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Put('updateAccount/:id')
@@ -72,6 +73,34 @@ export class AccountController {
             logger.log(level.error, `updateAccount Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiParam({ name: 'id' })
+    @ApiResponse({ type: AccountDeletedResponse })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Delete('deleteAccount/:id')
+    async deleteAccount(@Param('id') id: string, @Request() req, @Response() res) {
+        try {
+            logger.log(level.info, `deleteAccount body=${this.utils.beautify(req.body)} id=${id}`);
+            const deleted = await this.accountService.deleteAccountQuery(id).execute();
+            logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
+            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                success: true,
+                statusCode: HttpStatus.OK,
+                message: "Deleted SuccessFully",
+                data: deleted
+            })
+        } catch (error) {
+
+            logger.log(level.error, `deleteAccount Error=${error}`);
+            this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });

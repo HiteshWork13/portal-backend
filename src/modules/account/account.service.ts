@@ -103,4 +103,11 @@ export class AccountService {
     updateAccountQuery(id, body) {
         return this.Account.update({ id }, body)
     }
+
+    deleteAccountQuery(id) {
+        return this.Account.createQueryBuilder()
+            .delete()
+            .from('Account')
+            .where('id = :id', { id })
+    }
 }

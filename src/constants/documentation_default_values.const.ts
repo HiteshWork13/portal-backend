@@ -12,6 +12,7 @@ export const defaults = {
     successResponseCode: 200,
     successBoolean: true,
     successResponseMessage_Get: "Fetched Successfully",
+    successResponseMessage_Create: "Created Successfully",
     successResponseMessage_Delete: "Deleted Successfully",
     successResponseMessage_Update: "Updated Successfully",
     emptyData: "...",

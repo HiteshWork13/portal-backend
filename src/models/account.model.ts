@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional, OmitType } from "@nestjs/swagger";
 import { IsBoolean, IsDate, IsDateString, IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { defaults } from "src/constants/documentation_default_values.const";
 import { AdminUser } from "./admin.model";
+import { Response } from "./common.model";
 import { Pagination_Options } from "./db_operation.model";
 
 export class CreateAccount {
@@ -281,11 +282,32 @@ export class AccountUser extends CreateAccount {
     created_by: any
 }
 
-export class UpdateAccountUser extends OmitType(CreateAccount, ['emailverified', 'verificationtoken', 'created_by_id']) {}
 
 export class CreateBy extends Pagination_Options {
     @IsString()
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })
     created_by_id: string;
+}
+
+export class UpdateAccountUser extends OmitType(CreateAccount, ['emailverified', 'verificationtoken', 'created_by_id']) { }
+export class AccountUpdatedResponse extends Response {
+    @ApiProperty({ example: defaults.successResponseMessage_Update })
+    message: string
+
+    @ApiProperty({ type: AccountUser })
+    data: any
+}
+
+export class AccountDeletedResponse extends Response {
+    @ApiProperty({ example: defaults.successResponseMessage_Delete })
+    message: string
+}
+
+export class AccountCreatedResponse extends Response {
+    @ApiProperty({ type: AccountUser })
+    data: any
+
+    @ApiProperty({ example: defaults.successResponseMessage_Create })
+    message: string
 }

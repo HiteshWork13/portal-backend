@@ -1,22 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from "@nestjs/swagger";
 import { IsEmail, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 import { defaults } from "src/constants/documentation_default_values.const";
+import { Response } from "./common.model";
 import { Pagination_Options } from "./db_operation.model";
-
-class Response {
-
-    @IsOptional()
-    @ApiPropertyOptional({ example: defaults.successBoolean })
-    success: boolean;
-
-    @IsOptional()
-    @ApiPropertyOptional({ example: defaults.successResponseCode })
-    statusCode: number;
-
-    @IsOptional()
-    @ApiPropertyOptional({ example: defaults.successResponseMessage_Get })
-    message: string;
-}
 
 export class Login {
     @IsEmail()
