@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, R
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AccountUser, CreateAccount, CreateBy } from 'src/models/account.model';
+import { AccountUser, CreateAccount, CreateBy, UpdateAccountUser } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
@@ -29,7 +29,7 @@ export class AccountController {
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const input: CreateAccount = body;
             input.created_by_id = currentAdmin['id'];
-            const inserted: AccountUser = await this.accountService.CreateAccount(input);
+            const inserted: AccountUser = await this.accountService.createAccount(input);
             delete inserted.password;
             delete inserted['created_by']['password'];
             logger.log(level.info, `New Account Created : ${this.utils.beautify(inserted)}`);
@@ -42,6 +42,34 @@ export class AccountController {
 
         } catch (error) {
             logger.log(level.error, `createAccount Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiBody({ type: UpdateAccountUser })
+    @ApiResponse({ type: AccountUser })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Put('updateAccount/:id')
+    async updateAccount(@Param('id') updateId, @Body() body: any, @Request() req, @Response() res) {
+        try {
+            logger.log(level.info, `updateAccount body=${this.utils.beautify(body)} , param=${this.utils.beautify(updateId)}`);
+            const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
+            const updated = await this.accountService.updateAccountQuery(updateId, body);
+            logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
+            delete toBeUpdateAccount['created_by']['password'];
+            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                success: true,
+                statusCode: HttpStatus.OK,
+                message: "Updated SuccessFully",
+                data: { ...toBeUpdateAccount, ...body }
+            });
+        } catch (error) {
+            logger.log(level.error, `updateAccount Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
@@ -64,7 +92,7 @@ export class AccountController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            const accounts = await this.accountService.FindAccountByCreatedId(filter);
+            const accounts = await this.accountService.findAccountByCreatedId(filter);
             logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
             accounts.map(account => delete account['password']);
             this.utils.sendJSONResponse(res, HttpStatus.OK, {

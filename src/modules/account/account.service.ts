@@ -15,7 +15,7 @@ export class AccountService {
 
     }
 
-    async CreateAccount(inputData): Promise<AccountUser> {
+    async createAccount(inputData): Promise<AccountUser> {
         try {
             console.log("create account", inputData);
             const user: any = this.Account.create(inputData)
@@ -29,7 +29,7 @@ export class AccountService {
         }
     }
 
-    FindAccountByCreatedId = (filter) => {
+    findAccountByCreatedId = (filter) => {
         var query = this.Account.createQueryBuilder('account')
             .leftJoinAndSelect('account.created_by', 'admin');
 
@@ -91,5 +91,16 @@ export class AccountService {
         // query : select * from account where account.created_by == adminId or account.created_by in [sub admin's id <get sub admin ids via sub query>]
         return query.getMany();
 
+    }
+
+    findAccountById(id) {
+        return this.Account.createQueryBuilder('account')
+            .leftJoinAndSelect('account.created_by', 'admin')
+            .where("account.id = :accountId", { accountId: id }).getOne();
+        // return this.Account.findOne({ where: { id } });
+    }
+
+    updateAccountQuery(id, body) {
+        return this.Account.update({ id }, body)
     }
 }

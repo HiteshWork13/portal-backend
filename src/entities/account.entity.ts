@@ -72,8 +72,8 @@ export class AccountEntity {
     @Column({ default: 7 })
     triallimit: Number;
 
-    @Column({ default: 4 })
-    role: Number;
+    @Column({ type: "int", default: 4 })
+    role: 4
 
     @Column({ default: false, nullable: false })
     twofactor: Boolean;

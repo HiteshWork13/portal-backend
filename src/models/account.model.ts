@@ -281,6 +281,8 @@ export class AccountUser extends CreateAccount {
     created_by: any
 }
 
+export class UpdateAccountUser extends OmitType(CreateAccount, ['emailverified', 'verificationtoken', 'created_by_id']) {}
+
 export class CreateBy extends Pagination_Options {
     @IsString()
     @IsOptional()

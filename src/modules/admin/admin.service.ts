@@ -13,10 +13,6 @@ export class AdminService {
 
     }
 
-    /* FindAdminByEmailOnly(email): any {
-        return this.Admin.findOne({ where: { email } })
-    } */
-
     async CreateAdmin(inputData): Promise<AdminUser> {
         try {
             const user: any = this.Admin.create(inputData)
