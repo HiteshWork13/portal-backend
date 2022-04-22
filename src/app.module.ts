@@ -21,6 +21,7 @@ import { AccountModule } from './modules/account/account.module';
       synchronize: process.env.POSTGRES_SYNCHRONIZE,
       autoLoadEntities: true,
       keepConnectionAlive: true,
+      logging: true
     }),
     SharedModule,
     AuthModule,
