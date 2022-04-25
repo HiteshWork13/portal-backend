@@ -74,17 +74,18 @@ export class AccountService {
                     var parentIds = [filter['created_by_id']];
                     for (var i = 0; i < level.length; i++) {
                         const roleId = level[i];
+                        /* Create Random Variable Name for query. Because if paramname keep same in orWhere(). then it will overwrite last orwhere parameters so. */
+                        const paramName = `${Math.random()}_${Date.now()}`
                         if (parentIds.length > 0) {
                             var nextLevelAdmin = await query.subQuery()
                                 .select("adm.id")
                                 .from(AdminEntity, "adm")
                                 .where("adm.role = :role", { role: roleId })
-                                .andWhere('"adm"."created_by_id" IN (:...parentIds)', { parentIds: [...parentIds] })
-                                .printSql()
+                                .andWhere(`"adm"."created_by_id" IN (:...${paramName})`, { [paramName]: [...parentIds] })
                                 .getMany();
                             parentIds = [...nextLevelAdmin.map(item => { return item.id })];
                             if (parentIds.length > 0) {
-                                query = query.orWhere('"account"."created_by_id" IN (:...parentIds)', { parentIds: [...parentIds] })
+                                query = query.orWhere(`"account"."created_by_id" IN (:...${paramName})`, { [paramName]: [...parentIds] })
                             }
                         }
                     }
@@ -115,7 +116,7 @@ export class AccountService {
         }
 
         // query : select * from account where account.created_by == adminId or account.created_by in [sub admin's id <get sub admin ids via sub query>]
-        return query.printSql().getMany();
+        return query.getMany();
 
     }
 
