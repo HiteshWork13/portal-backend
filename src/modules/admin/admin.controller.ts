@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
 import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminStatus, UpdateAdminUser, UpdateAdminViewAccountPermission } from 'src/models/admin.model';
@@ -15,6 +15,7 @@ export class AdminController {
 
     }
 
+    @ApiTags('Admin')
     @ApiBody({ type: CreateSuperAdminUser })
     @ApiResponse({ type: AdminCreatedResponse })
     @Post('createSuperAdmin')
@@ -52,6 +53,7 @@ export class AdminController {
         }
     }
 
+    @ApiTags('Admin')
     @ApiBody({ type: CreateAdminUser })
     @ApiResponse({ type: AdminCreatedResponse })
     @ApiBearerAuth("access_token")
@@ -95,6 +97,7 @@ export class AdminController {
         }
     }
 
+    @ApiTags('Admin')
     @ApiBody({ type: RoleIdAndCreateBy })
     @ApiResponse({ type: AdminUser })
     @ApiBearerAuth("access_token")
@@ -128,6 +131,7 @@ export class AdminController {
         }
     }
 
+    @ApiTags('Admin')
     @ApiParam({ name: 'id' })
     @ApiBody({ type: UpdateAdminUser })
     @ApiResponse({ type: AdminUpdatedResponse })
@@ -173,6 +177,7 @@ export class AdminController {
         }
     }
 
+    @ApiTags('Admin')
     @ApiParam({ name: 'id' })
     @ApiResponse({ type: AdminDeletedResponse })
     @ApiBearerAuth("access_token")
@@ -216,6 +221,7 @@ export class AdminController {
         }
     }
 
+    @ApiTags('Admin')
     @ApiParam({ name: 'id' })
     @ApiBody({ type: UpdateAdminStatus })
     @ApiResponse({ type: AdminUpdatedResponse })
@@ -261,6 +267,7 @@ export class AdminController {
         }
     }
 
+    @ApiTags('Permissions')
     @ApiParam({ name: 'id' })
     @ApiBody({ type: UpdateAdminViewAccountPermission })
     @ApiResponse({ type: AdminUpdatedResponse })

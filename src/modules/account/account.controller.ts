@@ -1,13 +1,12 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
-import { APP_CONST, ERROR_CONST } from 'src/constants';
+import { ERROR_CONST } from 'src/constants';
 import { AccountCreatedResponse, AccountDeletedResponse, AccountUpdatedResponse, AccountUser, CreateAccount, CreateBy, UpdateAccountUser } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
-import { AdminService } from '../admin/admin.service';
 import { AccountService } from './account.service';
 
 @Controller('account')
@@ -17,6 +16,7 @@ export class AccountController {
 
     }
 
+    @ApiTags('Account')
     @ApiBody({ type: CreateAccount })
     @ApiResponse({ type: AccountCreatedResponse })
     @ApiBearerAuth("access_token")
@@ -50,6 +50,7 @@ export class AccountController {
         }
     }
 
+    @ApiTags('Account')
     @ApiParam({ name: 'id' })
     @ApiBody({ type: UpdateAccountUser })
     @ApiResponse({ type: AccountUpdatedResponse })
@@ -79,6 +80,7 @@ export class AccountController {
         }
     }
 
+    @ApiTags('Account')
     @ApiParam({ name: 'id' })
     @ApiResponse({ type: AccountDeletedResponse })
     @ApiBearerAuth("access_token")
@@ -107,6 +109,7 @@ export class AccountController {
         }
     }
 
+    @ApiTags('Account')
     @ApiBody({ type: CreateBy, description: "created_by_id can be any ID" })
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
@@ -140,6 +143,7 @@ export class AccountController {
         }
     }
 
+    @ApiTags('Account')
     @ApiBody({ type: CreateBy, description: "created_by_id can be any Admin Id (Role: 2)" })
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")

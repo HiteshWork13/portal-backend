@@ -1,6 +1,6 @@
 import { Body, Controller, HttpStatus, Post, Request, Response, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { ERROR_CONST } from 'src/constants';
 import { Login, LoginResponse } from 'src/models/admin.model';
@@ -14,6 +14,7 @@ export class AuthController {
 
     }
 
+    @ApiTags('Authentication')
     @ApiBody({ type: Login })
     @ApiResponse({ type: LoginResponse })
     @UseGuards(AuthGuard('local'))
