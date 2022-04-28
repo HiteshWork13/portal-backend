@@ -92,9 +92,7 @@ export class AccountService {
                         }
                     }
                 } else if (admin['role'] == APP_CONST.SUB_ADMIN_ROLE) {
-                    console.log("currentAdmin", currentAdmin);
                     // might be Sub admin Role
-                    // Check Current Admin Role first. if current role is sub admin then return mix result else single 
                     if (currentAdmin && filter.created_by_id == currentAdmin.id) {
                         const currentSubAdminPermissions: any = await query.subQuery().select("a.permissions").from(AdminEntity, 'a').where("a.id = :id", { id: filter['created_by_id'] }).getOne();
                         logger.log(level.info, `currentSubAdmin: ${currentSubAdminPermissions}`);
