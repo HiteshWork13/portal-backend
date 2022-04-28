@@ -145,7 +145,7 @@ export class AccountController {
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('getAccountsByAdminAndSubAdmin')
-    async getAccountsByAdminAndSubAdmin(@Body() body: CreateBy, @Response() res) {
+    async getAccountsByAdminAndSubAdmin(@Body() body: CreateBy,@Request() req, @Response() res) {
         try {
             logger.log(level.info, `getAccountsByAdminAndSubAdmin body=${this.utils.beautify(body)}`);
             const filter = {
@@ -154,7 +154,9 @@ export class AccountController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            const accounts = await this.accountService.getAccountsByAdminAndSubAdmin(filter);
+            const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
+            logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
+            const accounts = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
             logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
             accounts.map(account => delete account['created_by']['password']);
             this.utils.sendJSONResponse(res, HttpStatus.OK, {

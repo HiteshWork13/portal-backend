@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { level, logger } from 'src/config';
 import { APP_CONST } from 'src/constants';
 import { AccountEntity } from 'src/entities/account.entity';
 import { AdminEntity } from 'src/entities/admin.entity';
 import { AccountUser } from 'src/models/account.model';
-import { Repository } from 'typeorm';
+import { AdminUser } from 'src/models/admin.model';
+import { Admin, Repository } from 'typeorm';
 
 @Injectable()
 export class AccountService {
@@ -56,7 +58,7 @@ export class AccountService {
         return query.getMany();
     }
 
-    getAccountsByAdminAndSubAdmin = async (filter) => {
+    getAccountsByAdminAndSubAdmin = async (filter, currentAdmin: AdminUser = null) => {
         var hirarchy = {
             [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
             [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
@@ -90,9 +92,23 @@ export class AccountService {
                         }
                     }
                 } else if (admin['role'] == APP_CONST.SUB_ADMIN_ROLE) {
+                    console.log("currentAdmin", currentAdmin);
                     // might be Sub admin Role
                     // Check Current Admin Role first. if current role is sub admin then return mix result else single 
-                    query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+                    if (currentAdmin && filter.created_by_id == currentAdmin.id) {
+                        const currentSubAdminPermissions: any = await query.subQuery().select("a.permissions").from(AdminEntity, 'a').where("a.id = :id", { id: filter['created_by_id'] }).getOne();
+                        logger.log(level.info, `currentSubAdmin: ${currentSubAdminPermissions}`);
+                        query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+
+                        if (currentSubAdminPermissions) {
+                            const accountList = currentSubAdminPermissions?.permissions?.viewAccounts || [];
+                            if (accountList.length > 0) {
+                                query = query.orWhere(`"account"."created_by_id" IN (:...viewAccounts)`, { viewAccounts: [...accountList] })
+                            }
+                        }
+                    } else {
+                        query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+                    }
                 }
             } else {
                 // Unknown Id for created_by
