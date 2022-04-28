@@ -70,6 +70,10 @@ export class AdminUser extends CreateAdminUser {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.emptyData })
     access_token: string
+
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.emptyData })
+    permissions: any
 }
 
 

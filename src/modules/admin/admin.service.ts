@@ -25,7 +25,7 @@ export class AdminService {
 
     FindAdminByRoleIdAndCreatedId = (filter) => {
         var query = this.Admin.createQueryBuilder()
-            .select("id, username, email, role, status, created_by_id, created_at, updated_at")
+            .select("id, username, email, role, status, permissions, created_by_id, created_at, updated_at")
             .where('role = :role', { role: filter['role'] })
 
         if ('created_by_id' in filter && filter.created_by_id) {
