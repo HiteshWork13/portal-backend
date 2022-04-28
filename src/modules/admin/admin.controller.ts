@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Request, R
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminStatus, UpdateAdminUser } from 'src/models/admin.model';
+import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminStatus, UpdateAdminUser, UpdateAdminViewAccountPermission } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
@@ -178,7 +178,7 @@ export class AdminController {
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Delete('deleteAdminById/:id')
-    async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) { 
+    async deleteAdminById(@Param('id') id: string, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `deleteAdminById body=${this.utils.beautify(req.body)}`);
             const currentAdmin = await this.queryService.FindAdminByEmailOnly(req.user.email);
@@ -260,4 +260,47 @@ export class AdminController {
             });
         }
     }
+
+    @ApiParam({ name: 'id' })
+    @ApiBody({ type: UpdateAdminViewAccountPermission })
+    @ApiResponse({ type: AdminUpdatedResponse })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Put('updateViewAccountPermission/:id')
+    async updateViewAccountPermission(@Param('id') updateId, @Body() body: UpdateAdminViewAccountPermission, @Request() req, @Response() res) {
+        try {
+            logger.log(level.info, `updateStatusById body=${this.utils.beautify(body)}, param=${this.utils.beautify(updateId)}`);
+            const toBeUpdateAdmin = await this.adminService.FindAdminById(updateId);
+            if (toBeUpdateAdmin) {
+                const json = toBeUpdateAdmin.permissions
+                json['viewAccounts'] = body.viewAccountPermission;
+                console.log('json: ', json);
+                const updated = await this.adminService.UpdateAdminQuery(updateId, { permissions: json });
+                logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
+                this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    success: true,
+                    statusCode: HttpStatus.OK,
+                    message: "Status Updated SuccessFully",
+                    data: { ...toBeUpdateAdmin, ...({ permissions: json }), password: null }
+                })
+            } else {
+                this.utils.sendJSONResponse(res, HttpStatus.NOT_FOUND, {
+                    success: false,
+                    statusCode: HttpStatus.NOT_FOUND,
+                    message: ERROR_CONST.ADMIN_NOT_FOUND,
+                    data: {}
+                });
+            }
+        } catch (error) {
+
+            logger.log(level.error, `updateStatusById Error=${error}`);
+            this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
 }

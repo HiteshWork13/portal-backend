@@ -46,6 +46,9 @@ export class AdminEntity {
     @Column({ type: "timestamp", default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updated_at?: Date;
 
+    @Column({ type: "json", nullable: true, default: {} })
+    permissions: any
+
     @BeforeInsert()
     async hashPassword() {
         this.password = await bcrypt.hash(this.password, 8);

@@ -91,6 +91,7 @@ export class AccountService {
                     }
                 } else if (admin['role'] == APP_CONST.SUB_ADMIN_ROLE) {
                     // might be Sub admin Role
+                    // Check Current Admin Role first. if current role is sub admin then return mix result else single 
                     query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
                 }
             } else {
