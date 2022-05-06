@@ -110,7 +110,7 @@ export class AccountController {
     @ApiTags('Account')
     @ApiConsumes('multipart/form-data')
     @ApiParam({ name: 'id' })
-    @ApiBody({ type: UpdateAccountReqDoc, description: "Value of Data : Check `UpdateAccountReqDoc` In The Schema Section Under This Documentation"  })
+    @ApiBody({ type: UpdateAccountReqDoc, description: "Value of Data : Check `UpdateAccountReqDoc` In The Schema Section Under This Documentation" })
     @ApiResponse({ type: AccountUpdatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
@@ -191,6 +191,39 @@ export class AccountController {
             });
         } catch (error) {
             logger.log(level.error, `updateAccount Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiTags('Account')
+    @ApiParam({ name: 'id' })
+    @ApiBody({ type: UpdateAccountUser })
+    @ApiResponse({ type: AccountUpdatedResponse })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @UsePipes(new ValidationPipe({ transform: true }))
+    @Put('updateAccountStatus/:id')
+    async updateAccountStatus(@Param('id') updateId, @Body() body: any, @Request() req, @Response() res) {
+        try {
+
+            logger.log(level.info, `updateAccountStatus body=${this.utils.beautify(body)} , param=${this.utils.beautify(updateId)}`);
+
+            const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
+            const updated = await this.accountService.updateAccountQuery(updateId, body);
+            logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
+            delete toBeUpdateAccount['created_by']['password'];
+            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                success: true,
+                statusCode: HttpStatus.OK,
+                message: "Updated SuccessFully",
+                data: { ...toBeUpdateAccount, ...body }
+            });
+        } catch (error) {
+            logger.log(level.error, `updateAccountStatus Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
