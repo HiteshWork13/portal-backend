@@ -49,7 +49,7 @@ export class FileUploadService {
     }
 
     uploadFileToDest(dest, memoryStoredFile): Promise<any> {
-        logger.log(level.info, `destnation=${dest}`);
+        logger.log(level.info, `upload destnation=${dest}`);
         return new Promise(async (resolve, reject) => {
             try {
                 await this.createDirectoryPath(dest);
@@ -61,7 +61,7 @@ export class FileUploadService {
                         logger.log(level.error, `File Upload Error:${error}`);
                         resolve(null);
                     } else {
-                        console.log("file uploaded successfully");
+                        logger.log(level.info, "File Uploaded Successfully");
                         resolve({
                             name: name,
                             url: `${dest}/${name}`
@@ -72,6 +72,28 @@ export class FileUploadService {
 
             } catch (error) {
                 logger.log(level.error, `Fiel Uploading Error: ${error}`);
+                resolve(null);
+            }
+        })
+    }
+
+    deleteFileFromDest(url) {
+        logger.log(level.info, `delete destnation=${url}`);
+        return new Promise(async (resolve) => {
+            try {
+                return await fs.unlink(url, (error) => {
+                    if (error) {
+                        logger.log(level.error, `File Delete Error:${error}`);
+                        resolve(null);
+                    } else {
+                        logger.log(level.info, "File Deleted Successfully");
+                        resolve({ url })
+                    }
+
+                })
+
+            } catch (error) {
+                logger.log(level.error, `Fiel Deleting Error: ${error}`);
                 resolve(null);
             }
         })

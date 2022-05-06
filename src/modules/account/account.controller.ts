@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, HttpStatus, Param,  Post, Put, Request, Response,  UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AccountCreatedResponse, AccountDeletedResponse, AccountUpdatedResponse, AccountUser, CreateAccount, CreateAccountReq, CreateAccountReqDoc, CreateBy, UpdateAccountUser } from 'src/models/account.model';
+import { AccountCreatedResponse, AccountDeletedResponse, AccountUpdatedResponse, AccountUser, CreateAccount, CreateAccountReq, CreateAccountReqDoc, CreateBy, UpdateAccountReq, UpdateAccountReqDoc, UpdateAccountUser } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
@@ -58,6 +58,7 @@ export class AccountController {
             }
 
             var uploadedFile;
+
             if ('file' in body && body.file) {
                 const po_error = await this.utils.validateDTO(CreateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
@@ -107,25 +108,86 @@ export class AccountController {
     }
 
     @ApiTags('Account')
+    @ApiConsumes('multipart/form-data')
     @ApiParam({ name: 'id' })
-    @ApiBody({ type: UpdateAccountUser })
+    @ApiBody({ type: UpdateAccountReqDoc })
     @ApiResponse({ type: AccountUpdatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
-    @UsePipes(new ValidationPipe({ transform: true }))
     @Put('updateAccount/:id')
+    @FormDataRequest({ storage: MemoryStoredFile })
     async updateAccount(@Param('id') updateId, @Body() body: any, @Request() req, @Response() res) {
         try {
-            logger.log(level.info, `updateAccount body=${this.utils.beautify(body)} , param=${this.utils.beautify(updateId)}`);
+
+            const payload = <UpdateAccountUser>JSON.parse(body.data);
+            logger.log(level.info, `updateAccount body=${this.utils.beautify(payload)} , param=${this.utils.beautify(updateId)}`);
+
+            const body_error = await this.utils.validateDTO(UpdateAccountUser, payload)
+            logger.log(level.info, `Validation : ${body_error}`);
+
+            if (body_error.length > 0) {
+                return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    success: false,
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: body_error,
+                    error: ERROR_CONST.BAD_REQUEST
+                });
+            }
+
+            const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
+            logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
+
+            var uploadedFile;
+
+            if ('file' in body && body?.file) {
+                const po_error = await this.utils.validateDTO(UpdateAccountReq, body);
+                logger.log(level.info, `Validation Errors: ${po_error}`);
+                if (po_error.length > 0) {
+                    return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                        success: false,
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: po_error,
+                        error: ERROR_CONST.BAD_REQUEST
+                    });
+                }
+
+                const filter = { uploaded_by_id: currentAdmin.id, upload_for_account_id: updateId };
+                const document = await this.documentService.FindDocumentForAccount(filter).getOne();
+                logger.log(level.info, `Document Found:${this.utils.beautify(document)}`);
+                if (document) {
+                    // Update Document File.
+                    this.uploadService.deleteFileFromDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH, document.document_name)).then(async (result) => {
+                        uploadedFile = await this.uploadService.uploadFileToDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH), body.file);
+                        const docBody = {
+                            document_name: uploadedFile.name
+                        }
+                        const newDocument = await this.documentService.updateDocument(document.id, docBody);
+                        logger.log(level.info, `Document Updated:${this.utils.beautify(newDocument)}`);
+                    })
+                } else {
+                    // Insert New File for This Account
+                    uploadedFile = await this.uploadService.uploadFileToDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH), body.file);
+                    if (uploadedFile) {
+                        const document = {
+                            uploaded_by_id: currentAdmin.id,
+                            upload_for_account_id: updateId,
+                            document_name: uploadedFile.name
+                        }
+                        const newDocument = await this.documentService.createDocument(document);
+                        logger.log(level.info, `New Document Inserted:${this.utils.beautify(newDocument)}`);
+                    }
+                }
+            }
+
             const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
-            const updated = await this.accountService.updateAccountQuery(updateId, body);
+            const updated = await this.accountService.updateAccountQuery(updateId, payload);
             logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
             delete toBeUpdateAccount['created_by']['password'];
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 statusCode: HttpStatus.OK,
                 message: "Updated SuccessFully",
-                data: { ...toBeUpdateAccount, ...body }
+                data: { ...toBeUpdateAccount, ...payload }
             });
         } catch (error) {
             logger.log(level.error, `updateAccount Error=${error}`);

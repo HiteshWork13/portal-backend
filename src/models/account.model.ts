@@ -303,11 +303,8 @@ export class AccountUser extends CreateAccount {
 
     @IsOptional()
     @ApiPropertyOptional({ type: OmitType(AdminUser, ["access_token", 'password']) })
-    created_by: any
+    created_by: any;
 
-    // @IsOptional()
-    // @ApiPropertyOptional()
-    // file: any
 }
 
 
@@ -318,7 +315,21 @@ export class CreateBy extends Pagination_Options {
     created_by_id: string;
 }
 
-export class UpdateAccountUser extends OmitType(CreateAccount, ['emailverified', 'verificationtoken', 'created_by_id']) { }
+export class UpdateAccountUser extends OmitType(CreateAccount, ['verificationtoken', 'created_by_id']) { }
+
+
+export class UpdateAccountReq extends PO_File_DTO {
+    @ApiProperty()
+    data: string
+}
+
+export class UpdateAccountReqDoc extends PO_File_DTO {
+    @ApiProperty({ type: UpdateAccountUser })
+    data: any;
+}
+
+
+
 export class AccountUpdatedResponse extends Response {
     @ApiProperty({ example: defaults.successResponseMessage_Update })
     message: string

@@ -21,7 +21,7 @@ import { DocumentModule } from './modules/document/document.module';
       synchronize: process.env.POSTGRES_SYNCHRONIZE,
       autoLoadEntities: true,
       keepConnectionAlive: true,
-      logging: true
+      logging: false
     }),
     SharedModule,
     AuthModule,

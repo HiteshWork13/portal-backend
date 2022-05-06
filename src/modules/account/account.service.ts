@@ -1,18 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { level, logger } from 'src/config';
-import { APP_CONST } from 'src/constants';
+import { APP_CONST, ERROR_CONST } from 'src/constants';
 import { AccountEntity } from 'src/entities/account.entity';
 import { AdminEntity } from 'src/entities/admin.entity';
-import { AccountUser } from 'src/models/account.model';
+import { AccountUser, CreateAccount } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
+import { UtilsService } from 'src/shared/services/utils.service';
 import { Admin, Repository } from 'typeorm';
 
 @Injectable()
 export class AccountService {
     constructor(
         @InjectRepository(AccountEntity)
-        private Account: Repository<AccountEntity>
+        private Account: Repository<AccountEntity>,
+        private utils: UtilsService
     ) {
 
     }
@@ -152,4 +154,5 @@ export class AccountService {
             .from('Account')
             .where('id = :id', { id })
     }
+
 }

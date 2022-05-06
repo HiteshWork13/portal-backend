@@ -17,6 +17,18 @@ export class DocumentService {
 
     }
 
+    FindDocumentForAccount = (filter) => {
+        var query = this.Document.createQueryBuilder()
+            .select()
+            .where('uploaded_by_id = :uploaded_by_id', { uploaded_by_id: filter['uploaded_by_id'] })
+
+        if ('upload_for_account_id' in filter && filter.upload_for_account_id) {
+            query = query.andWhere('upload_for_account_id = :upload_for_account_id', { upload_for_account_id: filter['upload_for_account_id'] })
+        }
+
+        return query;
+    }
+
     async createDocument(inputData): Promise<Document> {
         try {
             logger.log(level.info, `createDocument body=${this.utils.beautify(inputData)}`);
@@ -37,5 +49,10 @@ export class DocumentService {
             throw error
         }
     }
+
+    updateDocument(id, body) {
+        return this.Document.update({ id }, body);
+    }
+    
 
 }
