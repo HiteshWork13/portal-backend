@@ -110,7 +110,7 @@ export class AccountController {
     @ApiTags('Account')
     @ApiConsumes('multipart/form-data')
     @ApiParam({ name: 'id' })
-    @ApiBody({ type: UpdateAccountReqDoc })
+    @ApiBody({ type: UpdateAccountReqDoc, description: "Value of Data : Check `UpdateAccountReqDoc` In The Schema Section Under This Documentation"  })
     @ApiResponse({ type: AccountUpdatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
