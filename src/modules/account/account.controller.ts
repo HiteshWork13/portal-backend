@@ -1,38 +1,94 @@
-import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, HttpStatus, Param,  Post, Put, Request, Response,  UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
-import { ERROR_CONST } from 'src/constants';
-import { AccountCreatedResponse, AccountDeletedResponse, AccountUpdatedResponse, AccountUser, CreateAccount, CreateBy, UpdateAccountUser } from 'src/models/account.model';
+import { APP_CONST, ERROR_CONST } from 'src/constants';
+import { AccountCreatedResponse, AccountDeletedResponse, AccountUpdatedResponse, AccountUser, CreateAccount, CreateAccountReq, CreateAccountReqDoc, CreateBy, UpdateAccountUser } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { AccountService } from './account.service';
+import { FormDataRequest, MemoryStoredFile } from "nestjs-form-data";
+import { FileUploadService } from 'src/shared/services/file-upload.service';
+import { DocumentService } from '../document/document.service';
+import path from 'path';
 
 @Controller('account')
 export class AccountController {
 
-    constructor(private accountService: AccountService, private queryService: QueryService, private utils: UtilsService) {
+    constructor(private accountService: AccountService, private documentService: DocumentService, private queryService: QueryService, private utils: UtilsService, private uploadService: FileUploadService) {
 
     }
 
     @ApiTags('Account')
-    @ApiBody({ type: CreateAccount })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: CreateAccountReqDoc, description: "Value of Data : Check `CreateAccountReqDoc` In The Schema Section Under This Documentation" })
     @ApiResponse({ type: AccountCreatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('createAccount')
-    async createAccount(@Body() body: CreateAccount, @Request() req, @Response() res) {
+    @FormDataRequest({ storage: MemoryStoredFile })
+    async createAccount(@Body() body: CreateAccountReq, @Request() req, @Response() res) {
         try {
-            logger.log(level.info, `createAccount body=${this.utils.beautify(body)}`);
+            const payload = <CreateAccount>JSON.parse(body.data);
+            logger.log(level.info, `createAccount body=${this.utils.beautify(payload)}`);
+
+            const body_error = await this.utils.validateDTO(CreateAccount, payload)
+            logger.log(level.info, `Validation : ${body_error}`);
+
+            if (body_error.length > 0) {
+                return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    success: false,
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: body_error,
+                    error: ERROR_CONST.BAD_REQUEST
+                });
+            }
+
             const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
-            const input: CreateAccount = body;
+
+            if ((currentAdmin.role == APP_CONST.ADMIN_ROLE || currentAdmin.role == APP_CONST.SUB_ADMIN_ROLE) && (!('file' in body) || !body?.file)) {
+                return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    success: false,
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: [ERROR_CONST.PO_FILE_MISSING],
+                    error: ERROR_CONST.BAD_REQUEST
+                });
+            }
+
+            var uploadedFile;
+            if ('file' in body && body.file) {
+                const po_error = await this.utils.validateDTO(CreateAccountReq, body);
+                logger.log(level.info, `Validation Errors: ${po_error}`);
+                if (po_error.length > 0) {
+                    return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                        success: false,
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        message: po_error,
+                        error: ERROR_CONST.BAD_REQUEST
+                    });
+                }
+                uploadedFile = await this.uploadService.uploadFileToDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH), body.file);
+            }
+
+            const input: CreateAccount = payload;
             input.created_by_id = currentAdmin['id'];
             const inserted: AccountUser = await this.accountService.createAccount(input);
             delete inserted.password;
             delete inserted['created_by']['password'];
             logger.log(level.info, `New Account Created : ${this.utils.beautify(inserted)}`);
+
+            if (uploadedFile) {
+                const document = {
+                    uploaded_by_id: currentAdmin.id,
+                    upload_for_account_id: inserted.id,
+                    document_name: uploadedFile.name
+                }
+                const newDocument = await this.documentService.createDocument(document);
+                logger.log(level.info, `New Document Inserted:${this.utils.beautify(newDocument)}`);
+            }
+
             return this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 statusCode: HttpStatus.OK,
@@ -56,6 +112,7 @@ export class AccountController {
     @ApiResponse({ type: AccountUpdatedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
+    @UsePipes(new ValidationPipe({ transform: true }))
     @Put('updateAccount/:id')
     async updateAccount(@Param('id') updateId, @Body() body: any, @Request() req, @Response() res) {
         try {
@@ -85,6 +142,7 @@ export class AccountController {
     @ApiResponse({ type: AccountDeletedResponse })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
+    @UsePipes(new ValidationPipe({ transform: true }))
     @Delete('deleteAccount/:id')
     async deleteAccount(@Param('id') id: string, @Request() req, @Response() res) {
         try {
@@ -114,6 +172,7 @@ export class AccountController {
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
+    @UsePipes(new ValidationPipe({ transform: true }))
     @Post('getAllAccountsByCreatedId')
     async getAllAccountsByCreatedId(@Body() body: CreateBy, @Response() res) {
         try {
@@ -148,8 +207,9 @@ export class AccountController {
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
+    @UsePipes(new ValidationPipe({ transform: true }))
     @Post('getAccountsByAdminAndSubAdmin')
-    async getAccountsByAdminAndSubAdmin(@Body() body: CreateBy,@Request() req, @Response() res) {
+    async getAccountsByAdminAndSubAdmin(@Body() body: CreateBy, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `getAccountsByAdminAndSubAdmin body=${this.utils.beautify(body)}`);
             const filter = {

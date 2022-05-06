@@ -3,6 +3,8 @@ import * as crypto from 'crypto';
 import * as shortid from 'shortid';
 import _ from 'lodash';
 import { JwtService } from './jwt.service';
+import { validate } from 'class-validator';
+import { ClassConstructor, plainToClass } from 'class-transformer';
 
 @Injectable()
 export class UtilsService {
@@ -18,7 +20,7 @@ export class UtilsService {
 
     IV = "366b6d5cae00e952bfe70e9260b93c0e"; // one kind of decryption key in a hex format (not utf8(string))
 
-    constructor() {}
+    constructor() { }
 
     encrypt(data) {
         if (data) {
@@ -172,5 +174,22 @@ export class UtilsService {
         } else {
             return json
         }
+    }
+
+    async validateDTO(DTO: ClassConstructor<any>, object: any) {
+        const res = await validate(plainToClass(DTO, object)).then(errors => {
+            if (errors.length > 0) {
+                // Validation Failed Here
+                let e = [];
+                errors.forEach(element => {
+                    e.push(...Object.values(element.constraints));
+                })
+                return e;
+            } else {
+                // Validation Success Here
+                return [];
+            }
+        });
+        return res;
     }
 }

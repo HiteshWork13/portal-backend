@@ -7,7 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { SharedModule } from './shared/shared.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AccountModule } from './modules/account/account.module';
-
+import { DocumentModule } from './modules/document/document.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -26,7 +26,8 @@ import { AccountModule } from './modules/account/account.module';
     SharedModule,
     AuthModule,
     AdminModule,
-    AccountModule
+    AccountModule,
+    DocumentModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,5 @@
 export const APP_CONST = {
   SUPER_ADMIN_ROLE: 1,
   ADMIN_ROLE: 2,
-  SUB_ADMIN_ROLE: 3
+  SUB_ADMIN_ROLE: 3,
 };

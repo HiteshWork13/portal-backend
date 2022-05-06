@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
@@ -9,6 +9,7 @@ import { UtilsService } from 'src/shared/services/utils.service';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
+@UsePipes(new ValidationPipe({ transform: true }))
 export class AdminController {
 
     constructor(private adminService: AdminService, private utils: UtilsService, private queryService: QueryService) {

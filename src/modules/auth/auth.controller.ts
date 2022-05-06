@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Request, Response, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Request, Response, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';

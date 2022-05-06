@@ -1,10 +1,10 @@
-import { ApiProperty, ApiPropertyOptional, OmitType } from "@nestjs/swagger";
-import { IsBoolean, IsDate, IsDateString, IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional, OmitType, PickType } from "@nestjs/swagger";
+import { IsBoolean,  IsDateString, IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { defaults } from "src/constants/documentation_default_values.const";
 import { AdminUser } from "./admin.model";
 import { Response } from "./common.model";
 import { Pagination_Options } from "./db_operation.model";
-
+import { IsFile, HasMimeType, MemoryStoredFile } from "nestjs-form-data";
 export class CreateAccount {
     @IsString()
     @IsOptional()
@@ -264,6 +264,30 @@ export class CreateAccount {
 
 }
 
+export class PO_File_DTO {
+
+    @ApiPropertyOptional()
+    @IsFile()
+    @HasMimeType(['application/pdf'])
+    file: MemoryStoredFile;
+
+}
+
+export class CreateAccountReq extends PO_File_DTO {
+
+    @ApiProperty()
+    data: string
+
+}
+
+export class CreateAccountReqDoc extends PO_File_DTO {
+
+    @ApiProperty({ type: CreateAccount })
+    data: any;
+
+}
+
+
 export class AccountUser extends CreateAccount {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.adminId })
@@ -280,6 +304,10 @@ export class AccountUser extends CreateAccount {
     @IsOptional()
     @ApiPropertyOptional({ type: OmitType(AdminUser, ["access_token", 'password']) })
     created_by: any
+
+    // @IsOptional()
+    // @ApiPropertyOptional()
+    // file: any
 }
 
 
