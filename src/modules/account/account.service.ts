@@ -21,7 +21,7 @@ export class AccountService {
 
     async createAccount(inputData): Promise<AccountUser> {
         try {
-            console.log("create account", inputData);
+            logger.log(level.info, `create account: ${this.utils.beautify(inputData)}`);
             const user: any = this.Account.create(inputData)
             await this.Account.save(user);
             var account: any = this.Account.createQueryBuilder('account')

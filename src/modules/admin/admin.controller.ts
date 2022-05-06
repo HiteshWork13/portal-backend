@@ -282,7 +282,6 @@ export class AdminController {
             if (toBeUpdateAdmin) {
                 const json = toBeUpdateAdmin.permissions
                 json['viewAccounts'] = body.viewAccountPermission;
-                console.log('json: ', json);
                 const updated = await this.adminService.UpdateAdminQuery(updateId, { permissions: json });
                 logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {

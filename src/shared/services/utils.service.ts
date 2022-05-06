@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { JwtService } from './jwt.service';
 import { validate } from 'class-validator';
 import { ClassConstructor, plainToClass } from 'class-transformer';
+import { level, logger } from 'src/config';
 
 @Injectable()
 export class UtilsService {
@@ -29,7 +30,7 @@ export class UtilsService {
                 const encrypted = Buffer.concat([cipher.update(Buffer.from(data, "utf8")), cipher.final()]);
                 return encrypted.toString('hex');
             } catch (error) {
-                console.log(error);
+                logger.log(level.error, `Encryption Error: ${error}`);
                 return data
             }
         }
@@ -43,7 +44,7 @@ export class UtilsService {
                 const decrypted = Buffer.concat([decipher.update(Buffer.from(hash, 'hex')), decipher.final()]);
                 return decrypted.toString();
             } catch (error) {
-                console.log(error);
+                logger.log(level.error, `Decryption Error: ${error}`);
                 return hash
             }
         }
