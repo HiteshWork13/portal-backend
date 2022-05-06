@@ -37,7 +37,7 @@ export class AccountController {
             logger.log(level.info, `Validation : ${body_error}`);
 
             if (body_error.length > 0) {
-                return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
                     statusCode: HttpStatus.BAD_REQUEST,
                     message: body_error,
@@ -49,7 +49,7 @@ export class AccountController {
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
 
             if ((currentAdmin.role == APP_CONST.ADMIN_ROLE || currentAdmin.role == APP_CONST.SUB_ADMIN_ROLE) && (!('file' in body) || !body?.file)) {
-                return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
                     statusCode: HttpStatus.BAD_REQUEST,
                     message: [ERROR_CONST.PO_FILE_MISSING],
@@ -63,7 +63,7 @@ export class AccountController {
                 const po_error = await this.utils.validateDTO(CreateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
                 if (po_error.length > 0) {
-                    return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                         success: false,
                         statusCode: HttpStatus.BAD_REQUEST,
                         message: po_error,
@@ -126,7 +126,7 @@ export class AccountController {
             logger.log(level.info, `Validation : ${body_error}`);
 
             if (body_error.length > 0) {
-                return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
                     statusCode: HttpStatus.BAD_REQUEST,
                     message: body_error,
@@ -143,7 +143,7 @@ export class AccountController {
                 const po_error = await this.utils.validateDTO(UpdateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
                 if (po_error.length > 0) {
-                    return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                    return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                         success: false,
                         statusCode: HttpStatus.BAD_REQUEST,
                         message: po_error,
