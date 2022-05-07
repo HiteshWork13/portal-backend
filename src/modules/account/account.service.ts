@@ -116,12 +116,17 @@ export class AccountService {
             }
         }
 
+        const count = await query.getCount();
+        const result = { count };
+
         if ('offset' in filter && filter.offset) {
-            query = query.offset(filter['offset'])
+            query = query.offset(filter['offset']);
+            result['offset'] = filter['offset'];
         }
 
         if ('limit' in filter && filter.limit) {
-            query = query.limit(filter['limit'])
+            query = query.limit(filter['limit']);
+            result['limit'] = filter.limit;
         }
 
         if ('order' in filter && filter.order) {
@@ -133,7 +138,11 @@ export class AccountService {
         }
 
         // query : select * from account where account.created_by == adminId or account.created_by in [sub admin's id <get sub admin ids via sub query>]
-        return query.getMany();
+        const data = await query.getMany();
+        result['data'] = data;
+
+        return result;
+
 
     }
 

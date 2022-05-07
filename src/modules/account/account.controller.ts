@@ -315,14 +315,18 @@ export class AccountController {
             }
             const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
-            const accounts = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
+            const accounts: any = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
             logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
-            accounts.map(account => delete account['created_by']['password']);
-            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+            accounts.data.map(account => delete account['created_by']['password']);
+            const response = {
                 success: true,
                 message: "Fetched SuccessFully",
-                data: accounts
-            })
+                data: accounts.data,
+                counts: accounts.count
+            };
+            'limit' in accounts ? response['limit'] = accounts['limit'] : null;
+            'offset' in accounts ? response['offset'] = accounts['offset'] : null;
+            this.utils.sendJSONResponse(res, HttpStatus.OK, response);
 
         } catch (error) {
             logger.log(level.error, `getAccountsByAdminAndSubAdmin Error=${error}`);
