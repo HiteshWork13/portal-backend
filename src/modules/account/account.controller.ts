@@ -58,8 +58,8 @@ export class AccountController {
             }
 
             var uploadedFile;
-
-            if ('file' in body && body.file) {
+            
+            if ('file' in body && body.file && body.file != null && body.file != undefined) {
                 const po_error = await this.utils.validateDTO(CreateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
                 if (po_error.length > 0) {
@@ -139,7 +139,7 @@ export class AccountController {
 
             var uploadedFile;
 
-            if ('file' in body && body?.file) {
+            if ('file' in body && body?.file && body?.file != null && body?.file != undefined) {
                 const po_error = await this.utils.validateDTO(UpdateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
                 if (po_error.length > 0) {
