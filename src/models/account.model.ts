@@ -160,7 +160,7 @@ export class CreateAccount {
 
     @IsString()
     @IsOptional()
-    @ApiProperty({ example: defaults.createdBy })
+    @ApiProperty({ example: defaults.createdBy, nullable: true })
     created_by_id: String;
 
     @IsString()
@@ -302,7 +302,7 @@ export class AccountUser extends CreateAccount {
     updated_at: string;
 
     @IsOptional()
-    @ApiPropertyOptional({ type: OmitType(AdminUser, ["access_token", 'password']) })
+    @ApiPropertyOptional({ type: OmitType(AdminUser, ["access_token", 'password']), nullable: true })
     created_by: any;
 
 }

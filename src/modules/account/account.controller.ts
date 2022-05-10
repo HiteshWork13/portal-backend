@@ -58,7 +58,7 @@ export class AccountController {
             }
 
             var uploadedFile;
-            
+
             if ('file' in body && body.file && body.file != null && body.file != undefined) {
                 const po_error = await this.utils.validateDTO(CreateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
@@ -182,7 +182,7 @@ export class AccountController {
             const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
             const updated = await this.accountService.updateAccountQuery(updateId, payload);
             logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
-            delete toBeUpdateAccount['created_by']['password'];
+            ('created_by' in toBeUpdateAccount && toBeUpdateAccount['created_by']) ? delete toBeUpdateAccount['created_by']['password'] : null;
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 statusCode: HttpStatus.OK,
@@ -215,7 +215,7 @@ export class AccountController {
             const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
             const updated = await this.accountService.updateAccountQuery(updateId, body);
             logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
-            delete toBeUpdateAccount['created_by']['password'];
+            ('created_by' in toBeUpdateAccount && toBeUpdateAccount['created_by']) ? delete toBeUpdateAccount['created_by']['password'] : null;
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 statusCode: HttpStatus.OK,
@@ -302,7 +302,7 @@ export class AccountController {
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
-    @UsePipes(new ValidationPipe({ transform: true }))
+    @UsePipes(new ValidationPipe({ transform: false }))
     @Post('getAccountsByAdminAndSubAdmin')
     async getAccountsByAdminAndSubAdmin(@Body() body: CreateBy, @Request() req, @Response() res) {
         try {
@@ -317,7 +317,9 @@ export class AccountController {
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const accounts: any = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
             logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
-            accounts.data.map(account => delete account['created_by']['password']);
+            accounts.data.map(account => {
+                ('created_by' in account && account['created_by']) ? delete account['created_by']['password'] : null;
+            });
             const response = {
                 success: true,
                 message: "Fetched SuccessFully",

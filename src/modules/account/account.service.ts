@@ -76,6 +76,9 @@ export class AccountService {
                     const level = hirarchy[admin['role']];
                     query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
                     var parentIds = [filter['created_by_id']];
+                    if(admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
+                        query = query.orWhere('"account"."created_by_id" IS NULL');
+                    }
                     for (var i = 0; i < level.length; i++) {
                         const roleId = level[i];
                         /* Create Random Variable Name for query. Because if paramname keep same in orWhere(). then it will overwrite last orwhere parameters so. */

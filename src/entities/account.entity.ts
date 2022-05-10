@@ -93,7 +93,7 @@ export class AccountEntity {
     @Column({ type: "integer", default: 0 })
     registrationtype: Number;
 
-    @Column()
+    @Column({ nullable: true })
     created_by_id: AdminEntity;
     
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
