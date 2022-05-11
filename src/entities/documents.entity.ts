@@ -1,5 +1,5 @@
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { AdminEntity } from "./admin.entity";
 import { AccountEntity } from "./account.entity";
 
@@ -15,19 +15,26 @@ export class DocumentsEntity {
     @JoinColumn({ name: "uploaded_by_id" })
     uploaded_by: AdminEntity
 
-    @Column({ nullable: true })
+    /* @Column({ nullable: true })
     upload_for_admin_id: AdminEntity
 
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id, { nullable: true })
     @JoinColumn({ name: "upload_for_admin_id" })
-    upload_for_admin: AdminEntity
+    upload_for_admin: AdminEntity */
 
-    @Column({ nullable: true })
+    /* @Column({ nullable: true })
     upload_for_account_id: AccountEntity
 
     @ManyToOne(() => AccountEntity, (Account) => Account.id, { nullable: true })
     @JoinColumn({ name: "upload_for_account_id" })
-    upload_for_account: AccountEntity
+    upload_for_account: AccountEntity */
+
+    @Column({ nullable: true })
+    upload_for_account_id: AdminEntity;
+
+    @OneToOne(() => AccountEntity, (account) => account.document, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'upload_for_account_id' })
+    upload_for_account
 
     @Column()
     document_name: string

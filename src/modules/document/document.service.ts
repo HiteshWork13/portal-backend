@@ -25,7 +25,7 @@ export class DocumentService {
         if ('upload_for_account_id' in filter && filter.upload_for_account_id) {
             query = query.andWhere('upload_for_account_id = :upload_for_account_id', { upload_for_account_id: filter['upload_for_account_id'] })
         }
-
+        
         return query;
     }
 
@@ -40,9 +40,9 @@ export class DocumentService {
             if ('upload_for_account_id' in inputData) {
                 query = query.leftJoinAndSelect('document.upload_for_account', 'account');
             }
-            if ('upload_for_admin_id' in inputData) {
+            /* if ('upload_for_admin_id' in inputData) {
                 query = query.leftJoinAndSelect('document.upload_for_admin', 'admin');
-            }
+            } */
             query = query.where('document.id = :doc_id', { doc_id: doc.id }).getOne();
             return query;
         } catch (error) {

@@ -26,6 +26,7 @@ export class AccountService {
             await this.Account.save(user);
             var account: any = this.Account.createQueryBuilder('account')
                 .leftJoinAndSelect('account.created_by_id', 'admin')
+                .leftJoinAndSelect('account.document', 'documents')
                 .where('account.id = :account_id', { account_id: user.id }).getOne()
             return account;
         } catch (error) {
@@ -35,7 +36,8 @@ export class AccountService {
 
     findAccountByCreatedId = (filter) => {
         var query = this.Account.createQueryBuilder('account')
-            .leftJoinAndSelect('account.created_by_id', 'admin');
+            .leftJoinAndSelect('account.created_by_id', 'admin')
+            .leftJoinAndSelect('account.document', 'documents');
 
         if ('created_by_id' in filter && filter.created_by_id) {
             query = query.where('account.created_by = :created_by', { created_by: filter['created_by_id'] })
@@ -67,6 +69,7 @@ export class AccountService {
         }
         var query = this.Account.createQueryBuilder('account');
         query.leftJoinAndSelect('account.created_by_id', 'admin');
+        query.leftJoinAndSelect('account.document', 'documents');
 
 
         if ('created_by_id' in filter && filter.created_by_id) {
@@ -152,6 +155,7 @@ export class AccountService {
     findAccountById(id) {
         return this.Account.createQueryBuilder('account')
             .leftJoinAndSelect('account.created_by_id', 'admin')
+            .leftJoinAndSelect('account.document', 'documents')
             .where("account.id = :accountId", { accountId: id }).getOne();
         // return this.Account.findOne({ where: { id } });
     }

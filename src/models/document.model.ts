@@ -17,6 +17,6 @@ export class Document {
     upload_for_admin: any
 
     @ApiProperty({ type: OmitType(AccountUser, ['password']) })
-    upload_for_account: any
+    upload_for_account_id: any
 
 }

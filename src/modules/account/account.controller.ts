@@ -88,6 +88,7 @@ export class AccountController {
                 }
                 const newDocument = await this.documentService.createDocument(document);
                 logger.log(level.info, `New Document Inserted:${this.utils.beautify(newDocument)}`);
+                inserted['document'] = newDocument;
             }
 
             return this.utils.sendJSONResponse(res, HttpStatus.OK, {
@@ -242,6 +243,12 @@ export class AccountController {
     async deleteAccount(@Param('id') id: string, @Request() req, @Response() res) {
         try {
             logger.log(level.info, `deleteAccount body=${this.utils.beautify(req.body)} id=${id}`);
+            const accountToBeDeleted = await this.accountService.findAccountById(id);
+            if(accountToBeDeleted && 'document' in accountToBeDeleted && accountToBeDeleted['document']) {
+                this.uploadService.deleteFileFromDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH, accountToBeDeleted['document'].document_name)).then(async (result) => {
+                    logger.log(level.info, `Document File Deleted:${this.utils.beautify(result)}`);
+                });
+            }
             const deleted = await this.accountService.deleteAccountQuery(id).execute();
             logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
