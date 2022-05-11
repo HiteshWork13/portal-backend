@@ -17,6 +17,10 @@ export class DocumentService {
 
     }
 
+    FindDocumentById(id) {
+        return this.Document.findOne({ where: { id } });
+    }
+
     FindDocumentForAccount = (filter) => {
         var query = this.Document.createQueryBuilder()
             .select()
@@ -25,8 +29,12 @@ export class DocumentService {
         if ('upload_for_account_id' in filter && filter.upload_for_account_id) {
             query = query.andWhere('upload_for_account_id = :upload_for_account_id', { upload_for_account_id: filter['upload_for_account_id'] })
         }
-        
+
         return query;
+    }
+
+    FindDocumentByAccountId(id) {
+        return this.Document.createQueryBuilder().select().where('upload_for_account_id = :upload_for_account_id', { upload_for_account_id: id }).getOne();
     }
 
     async createDocument(inputData): Promise<Document> {
@@ -53,6 +61,6 @@ export class DocumentService {
     updateDocument(id, body) {
         return this.Document.update({ id }, body);
     }
-    
+
 
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountEntity } from 'src/entities/account.entity';
 import { SharedModule } from 'src/shared/shared.module';
@@ -10,10 +10,11 @@ import { DocumentModule } from '../document/document.module';
   imports: [
     TypeOrmModule.forFeature([AccountEntity]),
     SharedModule,
-    DocumentModule,
+    forwardRef(() => DocumentModule),
     NestjsFormDataModule.config({ storage: MemoryStoredFile, fileSystemStoragePath: './po_files' }),
   ],
   controllers: [AccountController],
-  providers: [AccountService]
+  providers: [AccountService],
+  exports: [AccountService]
 })
 export class AccountModule {}
