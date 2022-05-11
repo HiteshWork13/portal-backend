@@ -24,7 +24,7 @@ export class AdminController {
         try {
             logger.log(level.info, `createSuperAdmin body=${this.utils.beautify(body)}`);
             const input: CreateSuperAdminUser = { ...body };
-            input['created_by_id'] = null;
+            input['created_by'] = null;
             if (body.admin_secret == process.env.ADMIN_SECRET) {
                 const inserted: AdminUser = await this.adminService.CreateAdmin(input);
                 delete inserted.password;
@@ -70,7 +70,7 @@ export class AdminController {
                 [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
             }
             const input: CreateAdminUser = body;
-            input.created_by_id = currentAdmin['id'];
+            input.created_by = currentAdmin['id'];
             if (admin_creation_access[currentAdmin['role']] && admin_creation_access[currentAdmin['role']].indexOf(input['role']) >= 0) {
                 const inserted = await this.adminService.CreateAdmin(input);
                 delete inserted.password;
@@ -109,7 +109,7 @@ export class AdminController {
             logger.log(level.info, `getAllAdminByRoleIdAndCreatedId body=${this.utils.beautify(body)}`);
             const filter = {
                 "role": body['role'],
-                "created_by_id": body['created_by_id'],
+                "created_by_id": body['created_by'],
                 "offset": body['offset'],
                 "limit": body['limit'],
                 "order": body['order'],

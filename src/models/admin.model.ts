@@ -35,10 +35,10 @@ export class CreateAdminUser extends Login {
     @IsString()
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })
-    created_by_id: string
+    created_by: string
 }
 
-export class CreateSuperAdminUser extends OmitType(CreateAdminUser, ['created_by_id']) {
+export class CreateSuperAdminUser extends OmitType(CreateAdminUser, ['created_by']) {
 
     @IsNotEmpty()
     @ApiProperty({ example: defaults.adminSecret })
@@ -108,7 +108,7 @@ export class RoleIdAndCreateBy extends Pagination_Options {
     @IsString()
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })
-    created_by_id: string;
+    created_by: string;
 }
 
 export class LoginResponse extends Response {

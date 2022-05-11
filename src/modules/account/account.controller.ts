@@ -74,10 +74,10 @@ export class AccountController {
             }
 
             const input: CreateAccount = payload;
-            input.created_by_id = currentAdmin['id'];
+            input.created_by = currentAdmin['id'];
             const inserted: AccountUser = await this.accountService.createAccount(input);
             delete inserted.password;
-            delete inserted['created_by']['password'];
+            delete inserted['created_by_id']['password'];
             logger.log(level.info, `New Account Created : ${this.utils.beautify(inserted)}`);
 
             if (uploadedFile) {
@@ -182,7 +182,7 @@ export class AccountController {
             const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
             const updated = await this.accountService.updateAccountQuery(updateId, payload);
             logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
-            ('created_by' in toBeUpdateAccount && toBeUpdateAccount['created_by']) ? delete toBeUpdateAccount['created_by']['password'] : null;
+            ('created_by_id' in toBeUpdateAccount && toBeUpdateAccount['created_by_id']) ? delete toBeUpdateAccount['created_by_id']['password'] : null;
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 statusCode: HttpStatus.OK,
@@ -215,7 +215,7 @@ export class AccountController {
             const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
             const updated = await this.accountService.updateAccountQuery(updateId, body);
             logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
-            ('created_by' in toBeUpdateAccount && toBeUpdateAccount['created_by']) ? delete toBeUpdateAccount['created_by']['password'] : null;
+            ('created_by_id' in toBeUpdateAccount && toBeUpdateAccount['created_by_id']) ? delete toBeUpdateAccount['created_by_id']['password'] : null;
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,
                 statusCode: HttpStatus.OK,
@@ -263,7 +263,7 @@ export class AccountController {
     }
 
     @ApiTags('Account')
-    @ApiBody({ type: CreateBy, description: "created_by_id can be any ID" })
+    @ApiBody({ type: CreateBy, description: "created_by can be any ID" })
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
@@ -273,7 +273,7 @@ export class AccountController {
         try {
             logger.log(level.info, `getAllAccountsByCreatedId body=${this.utils.beautify(body)}`);
             const filter = {
-                "created_by_id": body['created_by_id'],
+                "created_by_id": body['created_by'],
                 "offset": body['offset'],
                 "limit": body['limit'],
                 "order": body['order'],
@@ -298,7 +298,7 @@ export class AccountController {
     }
 
     @ApiTags('Account')
-    @ApiBody({ type: CreateBy, description: "created_by_id can be any Admin Id (Role: 2)" })
+    @ApiBody({ type: CreateBy, description: "created_by can be any Admin Id (Role: 2)" })
     @ApiResponse({ type: AccountUser })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
@@ -308,7 +308,7 @@ export class AccountController {
         try {
             logger.log(level.info, `getAccountsByAdminAndSubAdmin body=${this.utils.beautify(body)}`);
             const filter = {
-                "created_by_id": body['created_by_id'],
+                "created_by_id": body['created_by'],
                 "offset": body['offset'],
                 "limit": body['limit'],
                 "order": body['order'],
@@ -318,7 +318,7 @@ export class AccountController {
             const accounts: any = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
             logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
             accounts.data.map(account => {
-                ('created_by' in account && account['created_by']) ? delete account['created_by']['password'] : null;
+                ('created_by_id' in account && account['created_by_id']) ? delete account['created_by_id']['password'] : null;
             });
             const response = {
                 success: true,

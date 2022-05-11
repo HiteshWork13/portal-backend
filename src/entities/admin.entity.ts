@@ -24,11 +24,11 @@ export class AdminEntity {
     role: 1 | 2 | 3
 
     @Column({ nullable: true })
-    created_by_id: AdminEntity
+    created_by: AdminEntity
 
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id, { nullable: true })
-    @JoinColumn({ name: "created_by_id" })
-    created_by: AdminEntity;
+    @JoinColumn({ name: "created_by" })
+    created_by_id: AdminEntity;
 
 
     /* @ManyToOne(() => AdminEntity, (Admin) => Admin.subAdmins, { nullable: true })

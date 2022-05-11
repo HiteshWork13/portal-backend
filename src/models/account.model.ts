@@ -161,7 +161,7 @@ export class CreateAccount {
     @IsString()
     @IsOptional()
     @ApiProperty({ example: defaults.createdBy, nullable: true })
-    created_by_id: String;
+    created_by: String;
 
     @IsString()
     @IsOptional()
@@ -303,7 +303,7 @@ export class AccountUser extends CreateAccount {
 
     @IsOptional()
     @ApiPropertyOptional({ type: OmitType(AdminUser, ["access_token", 'password']), nullable: true })
-    created_by: any;
+    created_by_id: any;
 
 }
 
@@ -312,10 +312,10 @@ export class CreateBy extends Pagination_Options {
     @IsString()
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })
-    created_by_id: string;
+    created_by: string;
 }
 
-export class UpdateAccountUser extends OmitType(CreateAccount, ['verificationtoken', 'created_by_id']) { }
+export class UpdateAccountUser extends OmitType(CreateAccount, ['verificationtoken', 'created_by']) { }
 
 
 export class UpdateAccountReq extends PO_File_DTO {

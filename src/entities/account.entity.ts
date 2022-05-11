@@ -94,11 +94,11 @@ export class AccountEntity {
     registrationtype: Number;
 
     @Column({ nullable: true })
-    created_by_id: AdminEntity;
+    created_by: AdminEntity;
     
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
-    @JoinColumn({ name: "created_by_id" })
-    created_by: AdminEntity;
+    @JoinColumn({ name: "created_by" })
+    created_by_id: AdminEntity;
 
     @Column({ collation: "default" })
     enduser_street: string;

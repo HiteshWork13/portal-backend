@@ -25,7 +25,7 @@ export class AccountService {
             const user: any = this.Account.create(inputData)
             await this.Account.save(user);
             var account: any = this.Account.createQueryBuilder('account')
-                .leftJoinAndSelect('account.created_by', 'admin')
+                .leftJoinAndSelect('account.created_by_id', 'admin')
                 .where('account.id = :account_id', { account_id: user.id }).getOne()
             return account;
         } catch (error) {
@@ -35,10 +35,10 @@ export class AccountService {
 
     findAccountByCreatedId = (filter) => {
         var query = this.Account.createQueryBuilder('account')
-            .leftJoinAndSelect('account.created_by', 'admin');
+            .leftJoinAndSelect('account.created_by_id', 'admin');
 
         if ('created_by_id' in filter && filter.created_by_id) {
-            query = query.where('account.created_by_id = :created_by_id', { created_by_id: filter['created_by_id'] })
+            query = query.where('account.created_by = :created_by', { created_by: filter['created_by_id'] })
         }
 
         if ('offset' in filter && filter.offset) {
@@ -66,7 +66,7 @@ export class AccountService {
             [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
         }
         var query = this.Account.createQueryBuilder('account');
-        query.leftJoinAndSelect('account.created_by', 'admin');
+        query.leftJoinAndSelect('account.created_by_id', 'admin');
 
 
         if ('created_by_id' in filter && filter.created_by_id) {
@@ -74,10 +74,10 @@ export class AccountService {
             if (admin && admin['role']) {
                 if (admin['role'] in hirarchy) {
                     const level = hirarchy[admin['role']];
-                    query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+                    query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
                     var parentIds = [filter['created_by_id']];
                     if(admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
-                        query = query.orWhere('"account"."created_by_id" IS NULL');
+                        query = query.orWhere('"account"."created_by" IS NULL');
                     }
                     for (var i = 0; i < level.length; i++) {
                         const roleId = level[i];
@@ -88,11 +88,11 @@ export class AccountService {
                                 .select("adm.id")
                                 .from(AdminEntity, "adm")
                                 .where("adm.role = :role", { role: roleId })
-                                .andWhere(`"adm"."created_by_id" IN (:...${paramName})`, { [paramName]: [...parentIds] })
+                                .andWhere(`"adm"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
                                 .getMany();
                             parentIds = [...nextLevelAdmin.map(item => { return item.id })];
                             if (parentIds.length > 0) {
-                                query = query.orWhere(`"account"."created_by_id" IN (:...${paramName})`, { [paramName]: [...parentIds] })
+                                query = query.orWhere(`"account"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
                             }
                         }
                     }
@@ -101,21 +101,21 @@ export class AccountService {
                     if (currentAdmin && filter.created_by_id == currentAdmin.id) {
                         const currentSubAdminPermissions: any = await query.subQuery().select("a.permissions").from(AdminEntity, 'a').where("a.id = :id", { id: filter['created_by_id'] }).getOne();
                         logger.log(level.info, `currentSubAdmin: ${currentSubAdminPermissions}`);
-                        query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+                        query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
 
                         if (currentSubAdminPermissions) {
                             const accountList = currentSubAdminPermissions?.permissions?.viewAccounts || [];
                             if (accountList.length > 0) {
-                                query = query.orWhere(`"account"."created_by_id" IN (:...viewAccounts)`, { viewAccounts: [...accountList] })
+                                query = query.orWhere(`"account"."created_by" IN (:...viewAccounts)`, { viewAccounts: [...accountList] })
                             }
                         }
                     } else {
-                        query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+                        query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
                     }
                 }
             } else {
                 // Unknown Id for created_by
-                query = query.where('account.created_by_id = :adminId', { adminId: filter['created_by_id'] });
+                query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
             }
         }
 
@@ -151,7 +151,7 @@ export class AccountService {
 
     findAccountById(id) {
         return this.Account.createQueryBuilder('account')
-            .leftJoinAndSelect('account.created_by', 'admin')
+            .leftJoinAndSelect('account.created_by_id', 'admin')
             .where("account.id = :accountId", { accountId: id }).getOne();
         // return this.Account.findOne({ where: { id } });
     }
