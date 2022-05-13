@@ -19,3 +19,18 @@ export class Pagination_Options {
   @ApiProperty({ example: defaults.order })
   order: keyValue
 }
+export class Pagination_Options_Response {
+  @ApiProperty({ example: defaults.page_offset })
+  offset: string | number;
+
+  @ApiProperty({ example: defaults.page_limit })
+  limit: string | number
+
+  @ApiProperty({ example: defaults.order })
+  order: keyValue
+
+  @ApiProperty({ example: defaults.count })
+  count: number
+
+}
+

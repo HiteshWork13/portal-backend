@@ -140,7 +140,7 @@ export class AccountController {
 
             var uploadedFile;
 
-            if ('file' in body && body?.file && body?.file != null && body?.file != undefined) {
+            /* if ('file' in body && body?.file && body?.file != null && body?.file != undefined) {
                 const po_error = await this.utils.validateDTO(UpdateAccountReq, body);
                 logger.log(level.info, `Validation Errors: ${po_error}`);
                 if (po_error.length > 0) {
@@ -178,7 +178,7 @@ export class AccountController {
                         logger.log(level.info, `New Document Inserted:${this.utils.beautify(newDocument)}`);
                     }
                 }
-            }
+            } */
 
             const toBeUpdateAccount = await this.accountService.findAccountById(updateId);
             const updated = await this.accountService.updateAccountQuery(updateId, payload);
@@ -244,10 +244,15 @@ export class AccountController {
         try {
             logger.log(level.info, `deleteAccount body=${this.utils.beautify(req.body)} id=${id}`);
             const accountToBeDeleted = await this.accountService.findAccountById(id);
-            if(accountToBeDeleted && 'document' in accountToBeDeleted && accountToBeDeleted['document']) {
-                this.uploadService.deleteFileFromDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH, accountToBeDeleted['document'].document_name)).then(async (result) => {
-                    logger.log(level.info, `Document File Deleted:${this.utils.beautify(result)}`);
-                });
+            if (accountToBeDeleted) {
+                const docs = await this.documentService.FindDocumentsByAccountId({ account_id: id }).getMany();
+                if (docs && docs.length > 0) {
+                    docs.forEach(element => {
+                        this.uploadService.deleteFileFromDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH, element.document_name)).then(async (result) => {
+                            logger.log(level.info, `Document File Deleted:${this.utils.beautify(result)}`);
+                        });
+                    });
+                }
             }
             const deleted = await this.accountService.deleteAccountQuery(id).execute();
             logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);

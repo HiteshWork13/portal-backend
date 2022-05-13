@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { level, logger } from 'src/config';
 import { DocumentsEntity } from 'src/entities/documents.entity';
 import { Document } from 'src/models/document.model';
+import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { Repository } from 'typeorm';
 
@@ -12,7 +13,8 @@ export class DocumentService {
     constructor(
         @InjectRepository(DocumentsEntity)
         private Document: Repository<DocumentsEntity>,
-        private utils: UtilsService
+        private utils: UtilsService,
+        private queryService: QueryService
     ) {
 
     }
@@ -23,6 +25,8 @@ export class DocumentService {
 
     FindDocumentForAccount = (filter) => {
         var query = this.Document.createQueryBuilder()
+            .leftJoinAndSelect('document.uploaded_by', 'admin')
+            .leftJoinAndSelect('document.upload_for_account', 'account')
             .select()
             .where('uploaded_by_id = :uploaded_by_id', { uploaded_by_id: filter['uploaded_by_id'] })
 
@@ -33,8 +37,14 @@ export class DocumentService {
         return query;
     }
 
-    FindDocumentByAccountId(id) {
-        return this.Document.createQueryBuilder().select().where('upload_for_account_id = :upload_for_account_id', { upload_for_account_id: id }).getOne();
+    FindDocumentsByAccountId(filter) {
+        var query = this.Document.createQueryBuilder('document')
+            .leftJoinAndSelect('document.uploaded_by', 'admin')
+            .leftJoinAndSelect('document.upload_for_account', 'account')
+            .select()
+            .where('document.upload_for_account_id = :upload_for_account_id', { upload_for_account_id: filter.account_id });
+        query = this.queryService.ApplyPaginationToQuery(query, filter, 'document');
+        return query;
     }
 
     async createDocument(inputData): Promise<Document> {
@@ -43,14 +53,12 @@ export class DocumentService {
             const doc: any = this.Document.create(inputData)
             await this.Document.save(doc);
             var query: any = this.Document.createQueryBuilder('document')
-                .leftJoinAndSelect('document.uploaded_by', 'admin');
+                .leftJoinAndSelect('document.uploaded_by', 'admin')
 
             if ('upload_for_account_id' in inputData) {
                 query = query.leftJoinAndSelect('document.upload_for_account', 'account');
             }
-            /* if ('upload_for_admin_id' in inputData) {
-                query = query.leftJoinAndSelect('document.upload_for_admin', 'admin');
-            } */
+
             query = query.where('document.id = :doc_id', { doc_id: doc.id }).getOne();
             return query;
         } catch (error) {

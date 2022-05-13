@@ -19,6 +19,7 @@ export const defaults = {
     page_offset: 10,
     page_limit: 30,
     order: { username: "ASC" },
+    count: 10,
     sub_admin_list: ["b40f73a8-6c7e-4e3f-9f48-dd565d4f3d34", "deab059c-b6de-49ed-b6da-aa5eb8438964"],
 
     //  Account Defaults

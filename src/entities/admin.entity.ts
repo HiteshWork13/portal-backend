@@ -2,6 +2,7 @@
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import { AccountEntity } from "./account.entity";
+import { DocumentsEntity } from "./documents.entity";
 
 @Entity("Admin")
 export class AdminEntity {
@@ -29,16 +30,6 @@ export class AdminEntity {
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id, { nullable: true })
     @JoinColumn({ name: "created_by" })
     created_by_id: AdminEntity;
-
-
-    /* @ManyToOne(() => AdminEntity, (Admin) => Admin.subAdmins, { nullable: true })
-    owner: AdminEntity;
-
-    @OneToMany(() => AdminEntity, (Admin) => Admin.owner)
-    subAdmins: AdminEntity[]
-
-    @OneToMany(() => AccountEntity, (Account) => Account.owner, { nullable: true })
-    accounts: AccountEntity[] */
 
     @Column({ type: "timestamp", default: () => 'CURRENT_TIMESTAMP' })
     created_at?: Date;

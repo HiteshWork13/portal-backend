@@ -13,7 +13,7 @@ export class DocumentsEntity {
 
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id, { nullable: true })
     @JoinColumn({ name: "uploaded_by_id" })
-    uploaded_by: AdminEntity
+    uploaded_by: AdminEntity;
 
     /* @Column({ nullable: true })
     upload_for_admin_id: AdminEntity
@@ -30,11 +30,11 @@ export class DocumentsEntity {
     upload_for_account: AccountEntity */
 
     @Column({ nullable: true })
-    upload_for_account_id: AdminEntity;
+    upload_for_account_id: AccountEntity;
 
-    @OneToOne(() => AccountEntity, (account) => account.document, { onDelete: 'CASCADE' })
+    @ManyToOne(() => AccountEntity, (Account) => Account.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'upload_for_account_id' })
-    upload_for_account
+    upload_for_account: AccountEntity;
 
     @Column()
     document_name: string

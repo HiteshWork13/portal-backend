@@ -6,6 +6,7 @@ import { AccountEntity } from 'src/entities/account.entity';
 import { AdminEntity } from 'src/entities/admin.entity';
 import { AccountUser, CreateAccount } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
+import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { Admin, Repository } from 'typeorm';
 
@@ -14,7 +15,8 @@ export class AccountService {
     constructor(
         @InjectRepository(AccountEntity)
         private Account: Repository<AccountEntity>,
-        private utils: UtilsService
+        private utils: UtilsService,
+        private queryService: QueryService
     ) {
 
     }
@@ -26,7 +28,7 @@ export class AccountService {
             await this.Account.save(user);
             var account: any = this.Account.createQueryBuilder('account')
                 .leftJoinAndSelect('account.created_by_id', 'admin')
-                .leftJoinAndSelect('account.document', 'documents')
+                // .leftJoinAndSelect('account.document', 'documents')
                 .where('account.id = :account_id', { account_id: user.id }).getOne()
             return account;
         } catch (error) {
@@ -37,7 +39,7 @@ export class AccountService {
     findAccountByCreatedId = (filter) => {
         var query = this.Account.createQueryBuilder('account')
             .leftJoinAndSelect('account.created_by_id', 'admin')
-            .leftJoinAndSelect('account.document', 'documents');
+            // .leftJoinAndSelect('account.document', 'documents');
 
         if ('created_by_id' in filter && filter.created_by_id) {
             query = query.where('account.created_by = :created_by', { created_by: filter['created_by_id'] })
@@ -69,7 +71,7 @@ export class AccountService {
         }
         var query = this.Account.createQueryBuilder('account');
         query.leftJoinAndSelect('account.created_by_id', 'admin');
-        query.leftJoinAndSelect('account.document', 'documents');
+        // query.leftJoinAndSelect('account.document', 'documents');
 
 
         if ('created_by_id' in filter && filter.created_by_id) {
@@ -125,7 +127,9 @@ export class AccountService {
         const count = await query.getCount();
         const result = { count };
 
-        if ('offset' in filter && filter.offset) {
+        query = this.queryService.ApplyPaginationToQuery(query, filter);
+
+        /* if ('offset' in filter && filter.offset) {
             query = query.offset(filter['offset']);
             result['offset'] = filter['offset'];
         }
@@ -141,7 +145,7 @@ export class AccountService {
                     query = query.orderBy(key, filter.order[key])
                 }
             })
-        }
+        } */
 
         // query : select * from account where account.created_by == adminId or account.created_by in [sub admin's id <get sub admin ids via sub query>]
         const data = await query.getMany();
@@ -155,7 +159,7 @@ export class AccountService {
     findAccountById(id) {
         return this.Account.createQueryBuilder('account')
             .leftJoinAndSelect('account.created_by_id', 'admin')
-            .leftJoinAndSelect('account.document', 'documents')
+            // .leftJoinAndSelect('account.document', 'documents')
             .where("account.id = :accountId", { accountId: id }).getOne();
         // return this.Account.findOne({ where: { id } });
     }

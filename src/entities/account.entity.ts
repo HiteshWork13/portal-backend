@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { AdminEntity } from "./admin.entity";
 import * as bcrypt from 'bcrypt';
 import { DocumentsEntity } from "./documents.entity";
@@ -100,10 +100,6 @@ export class AccountEntity {
     @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
     @JoinColumn({ name: "created_by" })
     created_by_id: AdminEntity;
-
-    /* Below is not a column in a table. it just a  relationship expression that can used for get data from multiple table */
-    @OneToOne(() => DocumentsEntity, (document) => document.upload_for_account)
-    document: DocumentsEntity;
 
     @Column({ collation: "default" })
     enduser_street: string;

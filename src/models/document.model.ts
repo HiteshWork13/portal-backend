@@ -1,6 +1,10 @@
-import { ApiProperty, OmitType } from "@nestjs/swagger";
+import { ApiProperty, IntersectionType, OmitType } from "@nestjs/swagger";
+import { IsOptional, IsString } from "class-validator";
+import { defaults } from "src/constants/documentation_default_values.const";
 import { AccountUser } from "./account.model";
 import { AdminUser } from "./admin.model";
+import { Response } from "./common.model";
+import { Pagination_Options, Pagination_Options_Response } from "./db_operation.model";
 
 export class Document {
 
@@ -20,3 +24,27 @@ export class Document {
     upload_for_account: any
 
 }
+
+export class DocumentObject extends Document {
+    @ApiProperty({ example: defaults.createdAt })
+    created_at: string;
+
+    @ApiProperty({ example: defaults.updatedAt })
+    updated_at: string;
+}
+
+export class getAllDocumentReq extends Pagination_Options {
+
+    @IsString()
+    @ApiProperty()
+    account_id: string;
+
+}
+export class getAllDocumentRes extends IntersectionType(Response, Pagination_Options_Response) {
+
+    @IsString()
+    @ApiProperty({ type: DocumentObject })
+    data: Array<DocumentObject>;
+
+}
+
