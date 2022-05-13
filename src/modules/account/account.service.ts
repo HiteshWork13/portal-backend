@@ -129,24 +129,13 @@ export class AccountService {
 
         query = this.queryService.ApplyPaginationToQuery(query, filter);
 
-        /* if ('offset' in filter && filter.offset) {
-            query = query.offset(filter['offset']);
+        if ('offset' in filter && filter.offset) {
             result['offset'] = filter['offset'];
         }
-
         if ('limit' in filter && filter.limit) {
-            query = query.limit(filter['limit']);
             result['limit'] = filter.limit;
         }
-
-        if ('order' in filter && filter.order) {
-            Object.keys(filter.order).forEach(key => {
-                if (key in filter.order) {
-                    query = query.orderBy(key, filter.order[key])
-                }
-            })
-        } */
-
+        
         // query : select * from account where account.created_by == adminId or account.created_by in [sub admin's id <get sub admin ids via sub query>]
         const data = await query.getMany();
         result['data'] = data;

@@ -340,7 +340,7 @@ export class AccountController {
             };
             'limit' in accounts ? response['limit'] = accounts['limit'] : null;
             'offset' in accounts ? response['offset'] = accounts['offset'] : null;
-            this.utils.sendJSONResponse(res, HttpStatus.OK, response);
+            return this.utils.sendJSONResponse(res, HttpStatus.OK, response);
 
         } catch (error) {
             logger.log(level.error, `getAccountsByAdminAndSubAdmin Error=${error}`);
