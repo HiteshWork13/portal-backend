@@ -101,12 +101,8 @@ export class DocumentController {
     async uploadDocument(@Body() body: uploadDocumentReq, @Req() req, @Res() res) {
         try {
             logger.log(level.info, `uploadDocument account_id=${body.account_id}`);
-            const filter = {
-                "account_id": body.account_id
-            }
             const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
-
 
             var uploadedFile;
 
