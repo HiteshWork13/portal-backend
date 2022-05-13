@@ -1,5 +1,6 @@
 import { ApiProperty, IntersectionType, OmitType } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString, IsUUID } from "class-validator";
+import { HasMimeType, IsFile, MemoryStoredFile } from "nestjs-form-data";
 import { defaults } from "src/constants/documentation_default_values.const";
 import { AccountUser } from "./account.model";
 import { AdminUser } from "./admin.model";
@@ -46,5 +47,21 @@ export class getAllDocumentRes extends IntersectionType(Response, Pagination_Opt
     @ApiProperty({ type: DocumentObject })
     data: Array<DocumentObject>;
 
+}
+
+export class PO_File_DTO {
+
+    @ApiProperty()
+    @IsFile()
+    @HasMimeType(['application/pdf'])
+    file: MemoryStoredFile;
+
+}
+
+export class uploadDocumentReq extends PO_File_DTO {
+
+    @IsString()
+    @ApiProperty()
+    account_id: string;
 }
 
