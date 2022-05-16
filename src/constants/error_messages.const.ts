@@ -5,5 +5,6 @@ export const ERROR_CONST = {
   ADMIN_NOT_FOUND: "Admin Not Found",
   BAD_REQUEST: "Bad Request",
   PO_FILE_MISSING: "PO File Is Required.",
-  FILE_NOT_FOUND: "File Not Found."
+  FILE_NOT_FOUND: "File Not Found.",
+  DOCUMENT_NOT_FOUND: "Document Not Found."
 };

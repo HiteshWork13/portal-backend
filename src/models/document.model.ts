@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType, OmitType } from "@nestjs/swagger";
-import { IsOptional, IsString, IsUUID } from "class-validator";
+import { IsOptional, IsString, isUUID, IsUUID } from "class-validator";
 import { HasMimeType, IsFile, MemoryStoredFile } from "nestjs-form-data";
 import { defaults } from "src/constants/documentation_default_values.const";
 import { AccountUser } from "./account.model";
@@ -60,8 +60,17 @@ export class PO_File_DTO {
 
 export class uploadDocumentReq extends PO_File_DTO {
 
+    @IsUUID()
     @IsString()
     @ApiProperty()
     account_id: string;
+}
+
+export class updateDocumentReq extends PO_File_DTO {
+
+    @IsUUID()
+    @IsString()
+    @ApiProperty()
+    doc_id: string;
 }
 
