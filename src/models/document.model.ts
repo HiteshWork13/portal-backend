@@ -66,6 +66,8 @@ export class uploadDocumentReq extends PO_File_DTO {
     account_id: string;
 }
 
+export class uploadDocumentRes extends getAllDocumentRes { }
+
 export class updateDocumentReq extends PO_File_DTO {
 
     @IsUUID()
@@ -73,4 +75,11 @@ export class updateDocumentReq extends PO_File_DTO {
     @ApiProperty()
     doc_id: string;
 }
+
+export class updateDocumentRes extends Response {
+
+    @ApiProperty()
+    data: any;
+}
+
 

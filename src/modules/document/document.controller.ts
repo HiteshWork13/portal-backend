@@ -6,7 +6,7 @@ import path, { join } from 'path';
 import { level, logger } from 'src/config';
 import { ERROR_CONST } from 'src/constants';
 import { AdminUser } from 'src/models/admin.model';
-import { getAllDocumentReq, getAllDocumentRes, PO_File_DTO, updateDocumentReq, uploadDocumentReq } from 'src/models/document.model';
+import { getAllDocumentReq, getAllDocumentRes, PO_File_DTO, updateDocumentReq, updateDocumentRes, uploadDocumentReq, uploadDocumentRes } from 'src/models/document.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { FileUploadService } from 'src/shared/services/file-upload.service';
 import { QueryService } from 'src/shared/services/query.service';
@@ -93,7 +93,7 @@ export class DocumentController {
     @ApiTags('Document')
     @ApiConsumes('multipart/form-data')
     @ApiBody({ type: uploadDocumentReq })
-    @ApiResponse({ type: getAllDocumentRes })
+    @ApiResponse({ type: uploadDocumentRes })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('uploadDocument')
@@ -156,6 +156,7 @@ export class DocumentController {
             logger.log(level.error, `uploadDocument Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });
@@ -165,7 +166,7 @@ export class DocumentController {
     @ApiTags('Document')
     @ApiConsumes('multipart/form-data')
     @ApiBody({ type: updateDocumentReq })
-    @ApiResponse({ type: getAllDocumentRes })
+    @ApiResponse({ type: updateDocumentRes })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
     @Post('updateDocument')
@@ -210,6 +211,7 @@ export class DocumentController {
                         logger.log(level.info, `Document Updated:${this.utils.beautify(newDocument)}`);
                         return this.utils.sendJSONResponse(res, HttpStatus.OK, {
                             success: true,
+                            statusCode: HttpStatus.OK,
                             message: "Document Updated Successfully.",
                             data: newDocument
                         });
@@ -217,6 +219,7 @@ export class DocumentController {
                 } else {
                     return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                         success: false,
+                        statusCode: HttpStatus.BAD_REQUEST,
                         message: ERROR_CONST.DOCUMENT_NOT_FOUND,
                         data: null
                     });
@@ -225,6 +228,7 @@ export class DocumentController {
                 // Insert New File for This Account
                 return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
+                    statusCode: HttpStatus.BAD_REQUEST,
                     message: ERROR_CONST.DOCUMENT_NOT_FOUND,
                     data: null
                 });
@@ -233,6 +237,7 @@ export class DocumentController {
             logger.log(level.error, `uploadDocument Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });
