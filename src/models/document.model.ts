@@ -80,6 +80,16 @@ export class updateDocumentRes extends Response {
 
     @ApiProperty()
     data: any;
+
 }
+
+export class deleteDocumentRes extends Response {
+
+    @ApiProperty()
+    data: any;
+
+}
+
+
 
 

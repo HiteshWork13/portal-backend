@@ -70,5 +70,9 @@ export class DocumentService {
         return this.Document.update({ id }, body);
     }
 
+    deleteDocument(id) {
+        return this.Document.delete({ id })
+    }
+
 
 }

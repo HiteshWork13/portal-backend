@@ -1,12 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Req, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { FormDataRequest, MemoryStoredFile } from 'nestjs-form-data';
 import path, { join } from 'path';
 import { level, logger } from 'src/config';
 import { ERROR_CONST } from 'src/constants';
 import { AdminUser } from 'src/models/admin.model';
-import { getAllDocumentReq, getAllDocumentRes, PO_File_DTO, updateDocumentReq, updateDocumentRes, uploadDocumentReq, uploadDocumentRes } from 'src/models/document.model';
+import { deleteDocumentRes, getAllDocumentReq, getAllDocumentRes, PO_File_DTO, updateDocumentReq, updateDocumentRes, uploadDocumentReq, uploadDocumentRes } from 'src/models/document.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { FileUploadService } from 'src/shared/services/file-upload.service';
 import { QueryService } from 'src/shared/services/query.service';
@@ -108,7 +108,7 @@ export class DocumentController {
 
             const doc_error = await this.utils.validateDTO(uploadDocumentReq, body);
             logger.log(level.info, `Body Validation Errors: ${doc_error}`);
-            if(doc_error.length > 0) {
+            if (doc_error.length > 0) {
                 return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
                     statusCode: HttpStatus.BAD_REQUEST,
@@ -178,7 +178,7 @@ export class DocumentController {
 
             const doc_error = await this.utils.validateDTO(updateDocumentReq, body);
             logger.log(level.info, `Body Validation Errors: ${doc_error}`);
-            if(doc_error.length > 0) {
+            if (doc_error.length > 0) {
                 return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
                     statusCode: HttpStatus.BAD_REQUEST,
@@ -225,7 +225,6 @@ export class DocumentController {
                     });
                 }
             } else {
-                // Insert New File for This Account
                 return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
                     success: false,
                     statusCode: HttpStatus.BAD_REQUEST,
@@ -235,6 +234,47 @@ export class DocumentController {
             }
         } catch (error) {
             logger.log(level.error, `uploadDocument Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiTags('Document')
+    @ApiParam({ name: 'id' })
+    @ApiResponse({ type: deleteDocumentRes })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Delete('deleteDocument/:id')
+    async deleteDocument(@Param('id') id: any, @Req() req, @Res() res) {
+        try {
+            logger.log(level.info, `deleteDocument account_id=${id}`);
+
+            const document = await this.documentService.FindDocumentById(id);
+            logger.log(level.info, `Document Found:${this.utils.beautify(document)}`);
+            if (document) {
+                this.uploadService.deleteFileFromDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH, document.document_name)).then(async (result) => {
+                    const deleted = await this.documentService.deleteDocument(id);
+                    return this.utils.sendJSONResponse(res, HttpStatus.OK, {
+                        success: true,
+                        statusCode: HttpStatus.OK,
+                        message: "Document Deleted Successfully.",
+                        data: deleted
+                    });
+                })
+            } else {
+                return this.utils.sendJSONResponse(res, HttpStatus.BAD_REQUEST, {
+                    success: false,
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: ERROR_CONST.DOCUMENT_NOT_FOUND,
+                    data: null
+                });
+            }
+        } catch (error) {
+            logger.log(level.error, `deleteDocument Error=${error}`);
             return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
