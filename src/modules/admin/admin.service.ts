@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from 'src/entities/admin.entity';
 import { AdminUser } from 'src/models/admin.model';
+import { QueryService } from 'src/shared/services/query.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class AdminService {
     constructor(
         @InjectRepository(AdminEntity)
-        private Admin: Repository<AdminEntity>
+        private Admin: Repository<AdminEntity>,
+        private queryService: QueryService
     ) {
 
     }
@@ -23,7 +25,7 @@ export class AdminService {
         }
     }
 
-    FindAdminByRoleIdAndCreatedId = (filter) => {
+    FindAdminByRoleIdAndCreatedId = async (filter) => {
         var query = this.Admin.createQueryBuilder()
             .select("id, username, email, role, status, permissions, created_by, created_at, updated_at")
             .where('role = :role', { role: filter['role'] })
@@ -32,23 +34,22 @@ export class AdminService {
             query = query.andWhere('created_by = :created_by', { created_by: filter['created_by_id'] })
         }
 
+        const count = await query.getCount();
+        const result = { count };
+
+        query = this.queryService.ApplyPaginationToQuery(query, filter);
+
         if ('offset' in filter && filter.offset) {
-            query = query.offset(filter['offset'])
+            result['offset'] = filter['offset'];
         }
-
         if ('limit' in filter && filter.limit) {
-            query = query.limit(filter['limit'])
+            result['limit'] = filter.limit;
         }
+        
+        const data = await query.execute();
+        result['data'] = data;
 
-        if ('order' in filter && filter.order) {
-            Object.keys(filter.order).forEach(key => {
-                if (key in filter.order) {
-                    query = query.orderBy(key, filter.order[key])
-                }
-            })
-        }
-
-        return query;
+        return result;
     }
 
     FindAdminById(id) {

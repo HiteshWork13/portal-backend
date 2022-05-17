@@ -70,7 +70,7 @@ export class DocumentController {
                 "order": body['order'],
             }
             const [document, count] = await this.documentService.FindDocumentsByAccountId(filter).getManyAndCount();
-            console.log('document: ', document);
+            logger.log(level.info, `Document : ${this.utils.beautify(document)}`)
             const response = {
                 success: true,
                 message: "Document Fetched Successfully.",

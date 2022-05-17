@@ -114,13 +114,17 @@ export class AdminController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            const list = await this.adminService.FindAdminByRoleIdAndCreatedId(filter).execute();
+            const list: any = await this.adminService.FindAdminByRoleIdAndCreatedId(filter);
             logger.log(level.info, `Admin List: ${this.utils.beautify(list)}`);
-            this.utils.sendJSONResponse(res, HttpStatus.OK, {
+            const response = {
                 success: true,
                 message: "Fetched SuccessFully",
-                data: list
-            })
+                data: list.data,
+                counts: list.count
+            };
+            'limit' in list ? response['limit'] = list['limit'] : null;
+            'offset' in list ? response['offset'] = list['offset'] : null;
+            this.utils.sendJSONResponse(res, HttpStatus.OK, response);
 
         } catch (error) {
             logger.log(level.error, `getAllAdminByRoleIdAndCreatedId Error=${error}`);
