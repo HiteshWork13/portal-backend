@@ -8,6 +8,7 @@ import { SharedModule } from './shared/shared.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AccountModule } from './modules/account/account.module';
 import { DocumentModule } from './modules/document/document.module';
+import { DeviceModule } from './modules/device/device.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,7 +28,8 @@ import { DocumentModule } from './modules/document/document.module';
     AuthModule,
     AdminModule,
     AccountModule,
-    DocumentModule
+    DocumentModule,
+    DeviceModule
   ],
   controllers: [AppController],
   providers: [AppService],

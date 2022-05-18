@@ -6,5 +6,6 @@ export const ERROR_CONST = {
   BAD_REQUEST: "Bad Request",
   PO_FILE_MISSING: "PO File Is Required.",
   FILE_NOT_FOUND: "File Not Found.",
-  DOCUMENT_NOT_FOUND: "Document Not Found."
+  DOCUMENT_NOT_FOUND: "Document Not Found.",
+  DEVICE_NOT_FOUND: "Device Not Found."
 };
