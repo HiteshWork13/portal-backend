@@ -153,7 +153,6 @@ export class AccountService {
             "account.role": 'number',
             "account.totaldevices": 'number',
             "account.payid": 'number',
-            "account.purchasedate": 'date',
             "account.registrationtype": 'number',
             "account.created_by": 'uuid',
             "account.enduser_street": 'text',
@@ -167,14 +166,18 @@ export class AccountService {
             "account.reseller_lastname": 'text',
             "account.enduser_classification": 'text',
             "account.reseller_email": 'text',
-            "account.expirydate": 'date',
             "account.packageid_dr": 'number',
             "account.size_dr": 'number',
             "account.totaldevices_dr": 'number',
-            "account.expirydate_dr": 'date',
-            "account.created_at": 'date',
-            "account.updated_at": 'date'
+            
         }
+
+        // const searchFields = {
+            // "account.expirydate_dr": 'date',
+            // "account.created_at": 'date',
+            // "account.updated_at": 'date',
+            // "account.expirydate": 'date',
+        // }
 
         query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
 
