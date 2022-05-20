@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { AdminEntity } from 'src/entities/admin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -37,6 +37,29 @@ export class QueryService {
             })
         }
 
+        return query;
+    }
+
+    ApplySearchToQuery(query, filter, fields: Array<Array<string>> = []) {
+        if ('search_query' in filter && filter.search_query) {
+            query.andWhere(new Brackets(qry => {
+                fields.forEach(field => {
+                    const paramName = `${Math.round(Math.random() * 10000000000)}_${Date.now()}`
+                    switch (field[1]) {
+                        case "number":
+                        case "text":
+                        case "uuid":
+                            qry = qry.orWhere(`(${field[0]})::text like (:${paramName})`, { [paramName]: `%${filter.search_query}%` })
+                            break;
+                        case "date":
+                            qry = qry.orWhere(`(${field[0]})::text like (:${paramName})`, { [paramName]: `%${filter.search_query}%` })
+                            break;
+                        default:
+                            break;
+                    }
+                })
+            }))
+        }
         return query;
     }
 

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from "@nestjs/swagger";
-import { IsArray, IsEmail, IsEmpty, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { IsArray, IsEmail, IsEmpty, IsIn, IsNotEmpty, IsNumber, IsOptional, isString, IsString } from "class-validator"
 import { defaults } from "src/constants/documentation_default_values.const";
 import { Response } from "./common.model";
 import { Pagination_Options } from "./db_operation.model";
@@ -109,6 +109,11 @@ export class RoleIdAndCreateBy extends Pagination_Options {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })
     created_by: string;
+
+    @IsString()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.username })
+    search_query: string;
 }
 
 export class LoginResponse extends Response {
@@ -132,4 +137,12 @@ export class AdminUpdatedResponse extends Response {
 export class AdminDeletedResponse extends Response {
     @ApiProperty({ example: defaults.successResponseMessage_Delete })
     message: string
+}
+
+export class SearchAdminReq extends RoleIdAndCreateBy {
+
+    @IsString()
+    @ApiProperty()
+    search_query: string;
+
 }

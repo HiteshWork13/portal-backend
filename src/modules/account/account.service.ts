@@ -39,7 +39,7 @@ export class AccountService {
     findAccountByCreatedId = (filter) => {
         var query = this.Account.createQueryBuilder('account')
             .leftJoinAndSelect('account.created_by_id', 'admin')
-            // .leftJoinAndSelect('account.document', 'documents');
+        // .leftJoinAndSelect('account.document', 'documents');
 
         if ('created_by_id' in filter && filter.created_by_id) {
             query = query.where('account.created_by = :created_by', { created_by: filter['created_by_id'] })
@@ -81,7 +81,7 @@ export class AccountService {
                     const level = hirarchy[admin['role']];
                     query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
                     var parentIds = [filter['created_by_id']];
-                    if(admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
+                    if (admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
                         query = query.orWhere('"account"."created_by" IS NULL');
                     }
                     for (var i = 0; i < level.length; i++) {
@@ -124,6 +124,60 @@ export class AccountService {
             }
         }
 
+        // const searchFields = {
+        //     'account.id': 'uuid',
+        //     'account.code': 'text',
+        //     'account.firstname': 'text',
+        //     "account.lastname": 'text',
+        //     "account.companyname": 'text',
+        //     "account.phone": 'text',
+        //     "account.address": 'text',
+        //     "account.postcode": 'text',
+        //     "account.country": 'text',
+        //     "account.billingemail": 'text',
+        //     "account.customerid": 'text',
+        //     "account.vat": 'text',
+        //     "account.packageid": 'number',
+        //     "account.accounttype": 'number',
+        //     "account.credits": 'number',
+        //     "account.email": 'text',
+        //     "account.verificationtoken": 'text',
+        //     "account.city": 'text',
+        //     "account.triallimit": 'number',
+        //     "account.role": 'number',
+        //     "account.totaldevices": 'number',
+        //     "account.payid": 'number',
+        //     "account.purchasedate": 'date',
+        //     "account.registrationtype": 'number',
+        //     "account.created_by": 'uuid',
+        //     "account.enduser_street": 'text',
+        //     "account.enduser_state": 'text',
+        //     "account.enduser_email": 'text',
+        //     "account.reseller_company": 'text',
+        //     "account.reseller_street": 'text',
+        //     "account.reseller_state": 'text',
+        //     "account.reseller_code": 'text',
+        //     "account.reseller_firstname": 'text',
+        //     "account.reseller_lastname": 'text',
+        //     "account.enduser_classification": 'text',
+        //     "account.reseller_email": 'text',
+        //     "account.expirydate": 'date',
+        //     "account.packageid_dr": 'number',
+        //     "account.size_dr": 'number',
+        //     "account.totaldevices_dr": 'number',
+        //     "account.expirydate_dr": 'date',
+        //     "account.created_at": 'date',
+        //     "account.updated_at": 'date'
+        // }
+
+        // const searchFields = {
+        //     "account.country": 'text'
+        // }
+
+
+        // query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
+
+
         const count = await query.getCount();
         const result = { count };
 
@@ -135,7 +189,7 @@ export class AccountService {
         if ('limit' in filter && filter.limit) {
             result['limit'] = filter.limit;
         }
-        
+
         // query : select * from account where account.created_by == adminId or account.created_by in [sub admin's id <get sub admin ids via sub query>]
         const data = await query.getMany();
         result['data'] = data;

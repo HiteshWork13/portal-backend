@@ -2,7 +2,7 @@ import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Respon
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
-import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, UpdateAdminStatus, UpdateAdminUser, UpdateAdminViewAccountPermission } from 'src/models/admin.model';
+import { AdminCreatedResponse, AdminDeletedResponse, AdminUpdatedResponse, AdminUser, CreateAdminUser, CreateSuperAdminUser, RoleIdAndCreateBy, SearchAdminReq, UpdateAdminStatus, UpdateAdminUser, UpdateAdminViewAccountPermission } from 'src/models/admin.model';
 import { JwtAuthGuard } from 'src/shared/gaurds/jwt-auth.guard';
 import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
@@ -114,6 +114,8 @@ export class AdminController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
+            'search_query' in body ? filter['search_query'] = body['search_query'] : null ;
+
             const list: any = await this.adminService.FindAdminByRoleIdAndCreatedId(filter);
             logger.log(level.info, `Admin List: ${this.utils.beautify(list)}`);
             const response = {
@@ -308,6 +310,45 @@ export class AdminController {
             this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                 success: false,
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
+
+    @ApiTags('Admin')
+    @ApiBody({ type: SearchAdminReq })
+    @ApiResponse({ type: AdminUser })
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Post('searchAdmin')
+    async searchAdmin(@Body() body: SearchAdminReq, @Response() res) {
+        try {
+            logger.log(level.info, `searchAdmin body=${this.utils.beautify(body)}`);
+            const filter = {
+                "role": body['role'],
+                "created_by_id": body['created_by'],
+                "offset": body['offset'],
+                "limit": body['limit'],
+                "order": body['order'],
+                "search_query": body['search_query'],
+            }
+            const list: any = await this.adminService.FindAdminByRoleIdAndCreatedId(filter);
+            logger.log(level.info, `Admin List: ${this.utils.beautify(list)}`);
+            const response = {
+                success: true,
+                message: "Fetched SuccessFully",
+                data: list.data,
+                counts: list.count
+            };
+            'limit' in list ? response['limit'] = list['limit'] : null;
+            'offset' in list ? response['offset'] = list['offset'] : null;
+            this.utils.sendJSONResponse(res, HttpStatus.OK, response);
+
+        } catch (error) {
+            logger.log(level.error, `searchAdmin Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
                 message: ERROR_CONST.INTERNAL_SERVER_ERROR,
                 data: error
             });

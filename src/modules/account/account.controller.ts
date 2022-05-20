@@ -325,10 +325,11 @@ export class AccountController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
+            'search_query' in body ? filter['search_query'] = body['search_query'] : null ;
             const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const accounts: any = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
-            logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
+            // logger.log(level.info, `Account List: ${this.utils.beautify(accounts)}`);
             accounts.data.map(account => {
                 ('created_by_id' in account && account['created_by_id']) ? delete account['created_by_id']['password'] : null;
             });

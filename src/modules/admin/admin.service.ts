@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { classToPlain, serialize } from 'class-transformer';
 import { AdminEntity } from 'src/entities/admin.entity';
 import { AdminUser } from 'src/models/admin.model';
 import { QueryService } from 'src/shared/services/query.service';
@@ -36,7 +37,17 @@ export class AdminService {
 
         const count = await query.getCount();
         const result = { count };
-
+        const searchFields = {
+            'id': 'uuid',
+            'username': "text",
+            'email': "text",
+            'role': "number",
+            'status': "number", 
+            'created_by': "uuid",
+            'created_at': "date",
+            'updated_at': "date"
+        }
+        query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
         query = this.queryService.ApplyPaginationToQuery(query, filter);
 
         if ('offset' in filter && filter.offset) {
@@ -45,7 +56,7 @@ export class AdminService {
         if ('limit' in filter && filter.limit) {
             result['limit'] = filter.limit;
         }
-        
+
         const data = await query.execute();
         result['data'] = data;
 

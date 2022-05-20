@@ -1,9 +1,9 @@
-import { ApiProperty, ApiPropertyOptional, OmitType, PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, IntersectionType, OmitType, PickType } from "@nestjs/swagger";
 import { IsBoolean,  IsDateString, IsEmail, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { defaults } from "src/constants/documentation_default_values.const";
 import { AdminUser } from "./admin.model";
 import { Response } from "./common.model";
-import { Pagination_Options } from "./db_operation.model";
+import { Pagination_Options, Search_Query } from "./db_operation.model";
 import { IsFile, HasMimeType, MemoryStoredFile } from "nestjs-form-data";
 export class CreateAccount {
     @IsString()
@@ -308,7 +308,7 @@ export class AccountUser extends CreateAccount {
 }
 
 
-export class CreateBy extends Pagination_Options {
+export class CreateBy extends IntersectionType(Search_Query, Pagination_Options) {
     @IsString()
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.createdBy })

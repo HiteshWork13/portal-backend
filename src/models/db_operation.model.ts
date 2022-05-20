@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger"
-import { IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
+import { IsOptional, IsString, isString } from "class-validator";
 import { defaults } from "src/constants/documentation_default_values.const";
 import { IsInNested } from "src/shared/validators/is-in-nested.validator";
 
@@ -34,3 +34,9 @@ export class Pagination_Options_Response {
 
 }
 
+export class Search_Query {
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional({ example: defaults.username })
+  search_query: string;
+}
