@@ -49,10 +49,10 @@ export class QueryService {
                         case "number":
                         case "text":
                         case "uuid":
-                            qry = qry.orWhere(`(${field[0]})::text like (:${paramName})`, { [paramName]: `%${filter.search_query}%` })
+                            qry = qry.orWhere(`(${field[0]})::text ilike :${paramName}`, { [paramName]: `%${filter.search_query}%` })
                             break;
                         case "date":
-                            qry = qry.orWhere(`(${field[0]})::text like (:${paramName})`, { [paramName]: `%${filter.search_query}%` })
+                            qry = qry.orWhere(`(${field[0]})::text ilike :${paramName}`, { [paramName]: `%${filter.search_query}%` })
                             break;
                         default:
                             break;

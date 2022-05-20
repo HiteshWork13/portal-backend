@@ -8,7 +8,7 @@ import { AccountUser, CreateAccount } from 'src/models/account.model';
 import { AdminUser } from 'src/models/admin.model';
 import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
-import { Admin, Repository } from 'typeorm';
+import { Admin, Brackets, Repository } from 'typeorm';
 
 @Injectable()
 export class AccountService {
@@ -73,109 +73,110 @@ export class AccountService {
         query.leftJoinAndSelect('account.created_by_id', 'admin');
         // query.leftJoinAndSelect('account.document', 'documents');
 
-
         if ('created_by_id' in filter && filter.created_by_id) {
             const admin = await query.subQuery().select("a.role").from(AdminEntity, 'a').where("a.id = :id", { id: filter.created_by_id }).getOne();
             if (admin && admin['role']) {
                 if (admin['role'] in hirarchy) {
                     const level = hirarchy[admin['role']];
-                    query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
-                    var parentIds = [filter['created_by_id']];
-                    if (admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
-                        query = query.orWhere('"account"."created_by" IS NULL');
-                    }
-                    for (var i = 0; i < level.length; i++) {
-                        const roleId = level[i];
-                        /* Create Random Variable Name for query. Because if paramname keep same in orWhere(). then it will overwrite last orwhere parameters so. */
-                        const paramName = `${Math.random()}_${Date.now()}`
-                        if (parentIds.length > 0) {
-                            var nextLevelAdmin = await query.subQuery()
-                                .select("adm.id")
-                                .from(AdminEntity, "adm")
-                                .where("adm.role = :role", { role: roleId })
-                                .andWhere(`"adm"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
-                                .getMany();
-                            parentIds = [...nextLevelAdmin.map(item => { return item.id })];
+                    query = query.where(new Brackets(async (qry) => {
+                        qry = qry.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
+                        var parentIds = [filter['created_by_id']];
+                        if (admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
+                            qry = qry.orWhere('"account"."created_by" IS NULL');
+                        }
+                        for (var i = 0; i < level.length; i++) {
+                            const roleId = level[i];
+                            /* Create Random Variable Name for query. Because if paramname keep same in orWhere(). then it will overwrite last orwhere parameters so. */
+                            const paramName = `${Math.random()}_${Date.now()}`
                             if (parentIds.length > 0) {
-                                query = query.orWhere(`"account"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
+                                var nextLevelAdmin = await query.subQuery()
+                                    .select("adm.id")
+                                    .from(AdminEntity, "adm")
+                                    .where("adm.role = :role", { role: roleId })
+                                    .andWhere(`"adm"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
+                                    .getMany();
+                                parentIds = [...nextLevelAdmin.map(item => { return item.id })];
+                                if (parentIds.length > 0) {
+                                    qry = qry.orWhere(`"account"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
+                                }
                             }
                         }
-                    }
+                    }));
                 } else if (admin['role'] == APP_CONST.SUB_ADMIN_ROLE) {
                     // might be Sub admin Role
                     if (currentAdmin && filter.created_by_id == currentAdmin.id) {
                         const currentSubAdminPermissions: any = await query.subQuery().select("a.permissions").from(AdminEntity, 'a').where("a.id = :id", { id: filter['created_by_id'] }).getOne();
                         logger.log(level.info, `currentSubAdmin: ${currentSubAdminPermissions}`);
-                        query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
-
-                        if (currentSubAdminPermissions) {
-                            const accountList = currentSubAdminPermissions?.permissions?.viewAccounts || [];
-                            if (accountList.length > 0) {
-                                query = query.orWhere(`"account"."created_by" IN (:...viewAccounts)`, { viewAccounts: [...accountList] })
+                        query = query.where(new Brackets(async (qry) => {
+                            qry = qry.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
+                            if (currentSubAdminPermissions) {
+                                const accountList = currentSubAdminPermissions?.permissions?.viewAccounts || [];
+                                if (accountList.length > 0) {
+                                    qry = qry.orWhere(`"account"."created_by" IN (:...viewAccounts)`, { viewAccounts: [...accountList] })
+                                }
                             }
-                        }
+                        }));
                     } else {
-                        query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
+                        query = query.where(new Brackets(async (qry) => {
+                            qry = qry.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
+                        }));
                     }
                 }
             } else {
                 // Unknown Id for created_by
-                query = query.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
+                query = query.where(new Brackets(async (qry) => {
+                    qry = qry.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
+                }));
             }
         }
 
-        // const searchFields = {
-        //     'account.id': 'uuid',
-        //     'account.code': 'text',
-        //     'account.firstname': 'text',
-        //     "account.lastname": 'text',
-        //     "account.companyname": 'text',
-        //     "account.phone": 'text',
-        //     "account.address": 'text',
-        //     "account.postcode": 'text',
-        //     "account.country": 'text',
-        //     "account.billingemail": 'text',
-        //     "account.customerid": 'text',
-        //     "account.vat": 'text',
-        //     "account.packageid": 'number',
-        //     "account.accounttype": 'number',
-        //     "account.credits": 'number',
-        //     "account.email": 'text',
-        //     "account.verificationtoken": 'text',
-        //     "account.city": 'text',
-        //     "account.triallimit": 'number',
-        //     "account.role": 'number',
-        //     "account.totaldevices": 'number',
-        //     "account.payid": 'number',
-        //     "account.purchasedate": 'date',
-        //     "account.registrationtype": 'number',
-        //     "account.created_by": 'uuid',
-        //     "account.enduser_street": 'text',
-        //     "account.enduser_state": 'text',
-        //     "account.enduser_email": 'text',
-        //     "account.reseller_company": 'text',
-        //     "account.reseller_street": 'text',
-        //     "account.reseller_state": 'text',
-        //     "account.reseller_code": 'text',
-        //     "account.reseller_firstname": 'text',
-        //     "account.reseller_lastname": 'text',
-        //     "account.enduser_classification": 'text',
-        //     "account.reseller_email": 'text',
-        //     "account.expirydate": 'date',
-        //     "account.packageid_dr": 'number',
-        //     "account.size_dr": 'number',
-        //     "account.totaldevices_dr": 'number',
-        //     "account.expirydate_dr": 'date',
-        //     "account.created_at": 'date',
-        //     "account.updated_at": 'date'
-        // }
+        const searchFields = {
+            'account.id': 'uuid',
+            'account.code': 'text',
+            'account.firstname': 'text',
+            "account.lastname": 'text',
+            "account.companyname": 'text',
+            "account.phone": 'text',
+            "account.address": 'text',
+            "account.postcode": 'text',
+            "account.country": 'text',
+            "account.billingemail": 'text',
+            "account.customerid": 'text',
+            "account.vat": 'text',
+            "account.packageid": 'number',
+            "account.accounttype": 'number',
+            "account.credits": 'number',
+            "account.email": 'text',
+            "account.verificationtoken": 'text',
+            "account.city": 'text',
+            "account.triallimit": 'number',
+            "account.role": 'number',
+            "account.totaldevices": 'number',
+            "account.payid": 'number',
+            "account.purchasedate": 'date',
+            "account.registrationtype": 'number',
+            "account.created_by": 'uuid',
+            "account.enduser_street": 'text',
+            "account.enduser_state": 'text',
+            "account.enduser_email": 'text',
+            "account.reseller_company": 'text',
+            "account.reseller_street": 'text',
+            "account.reseller_state": 'text',
+            "account.reseller_code": 'text',
+            "account.reseller_firstname": 'text',
+            "account.reseller_lastname": 'text',
+            "account.enduser_classification": 'text',
+            "account.reseller_email": 'text',
+            "account.expirydate": 'date',
+            "account.packageid_dr": 'number',
+            "account.size_dr": 'number',
+            "account.totaldevices_dr": 'number',
+            "account.expirydate_dr": 'date',
+            "account.created_at": 'date',
+            "account.updated_at": 'date'
+        }
 
-        // const searchFields = {
-        //     "account.country": 'text'
-        // }
-
-
-        // query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
+        query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
 
 
         const count = await query.getCount();
@@ -195,8 +196,6 @@ export class AccountService {
         result['data'] = data;
 
         return result;
-
-
     }
 
     findAccountById(id) {

@@ -22,7 +22,7 @@ import { DeviceModule } from './modules/device/device.module';
       synchronize: process.env.POSTGRES_SYNCHRONIZE,
       autoLoadEntities: true,
       keepConnectionAlive: true,
-      logging: false
+      logging: true
     }),
     SharedModule,
     AuthModule,
