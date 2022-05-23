@@ -34,20 +34,22 @@ export class AdminService {
         if ('created_by_id' in filter && filter.created_by_id) {
             query = query.andWhere('created_by = :created_by', { created_by: filter['created_by_id'] })
         }
+        const searchFields = {
+            // 'id': 'uuid',
+            'username': "text",
+            'email': "text",
+            // 'role': "number",
+            // 'status': "number", 
+            // 'created_by': "uuid",
+            // 'created_at': "date",
+            // 'updated_at': "date"
+        }
+
+        query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
 
         const count = await query.getCount();
         const result = { count };
-        const searchFields = {
-            'id': 'uuid',
-            'username': "text",
-            'email': "text",
-            'role': "number",
-            'status': "number", 
-            'created_by': "uuid",
-            'created_at': "date",
-            'updated_at': "date"
-        }
-        query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
+       
         query = this.queryService.ApplyPaginationToQuery(query, filter);
 
         if ('offset' in filter && filter.offset) {

@@ -169,7 +169,7 @@ export class AccountService {
             "account.packageid_dr": 'number',
             "account.size_dr": 'number',
             "account.totaldevices_dr": 'number',
-            
+            "admin.username": 'text'
         }
 
         // const searchFields = {
