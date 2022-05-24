@@ -65,6 +65,47 @@ export class AccountService {
     }
 
     getAccountsByAdminAndSubAdmin = async (filter, currentAdmin: AdminUser = null) => {
+        const searchFields = {
+            'account.id': 'uuid',
+            // 'account.code': 'text',
+            'account.firstname': 'text',
+            "account.lastname": 'text',
+            "account.companyname": 'text',
+            // "account.phone": 'text',
+            // "account.address": 'text',
+            // "account.postcode": 'text',
+            "account.country": 'text',
+            // "account.billingemail": 'text',
+            // "account.customerid": 'text',
+            // "account.vat": 'text',
+            // "account.packageid": 'number',
+            // "account.accounttype": 'number',
+            // "account.credits": 'number',
+            "account.email": 'text',
+            // "account.verificationtoken": 'text',
+            // "account.city": 'text',
+            // "account.triallimit": 'number',
+            // "account.role": 'number',
+            // "account.totaldevices": 'number',
+            // "account.payid": 'number',
+            // "account.registrationtype": 'number',
+            "account.created_by": 'uuid',
+            // "account.enduser_street": 'text',
+            // "account.enduser_state": 'text',
+            "account.enduser_email": 'text',
+            "account.reseller_company": 'text',
+            // "account.reseller_street": 'text',
+            // "account.reseller_state": 'text',
+            // "account.reseller_code": 'text',
+            "account.reseller_firstname": 'text',
+            "account.reseller_lastname": 'text',
+            // "account.enduser_classification": 'text',
+            "account.reseller_email": 'text',
+            // "account.packageid_dr": 'number',
+            // "account.size_dr": 'number',
+            // "account.totaldevices_dr": 'number',
+            "admin.username": 'text'
+        }
         var hirarchy = {
             [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],
             [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
@@ -78,32 +119,30 @@ export class AccountService {
             if (admin && admin['role']) {
                 if (admin['role'] in hirarchy) {
                     const level = hirarchy[admin['role']];
-                    query = query.where(new Brackets(async (qry) => {
+                    var parentIds = [filter['created_by_id']];
+                    var idList = [];
+                    for (var i = 0; i < level.length; i++) {
+                        const roleId = level[i];
+                        if (parentIds.length > 0) {
+                            var nextLevelAdmin = await this._getIds(query, roleId, parentIds);
+                            parentIds = [...nextLevelAdmin.map(item => { return item.id })];
+                            if (parentIds.length > 0) {
+                                idList = [...idList, ...parentIds];
+                            }
+                        }
+                    }
+
+                    query = await query.where(new Brackets(async (qry) => {
                         qry = qry.where('account.created_by = :adminId', { adminId: filter['created_by_id'] });
-                        var parentIds = [filter['created_by_id']];
                         if (admin['role'] == APP_CONST.SUPER_ADMIN_ROLE) {
                             qry = qry.orWhere('"account"."created_by" IS NULL');
                         }
-                        for (var i = 0; i < level.length; i++) {
-                            const roleId = level[i];
-                            /* Create Random Variable Name for query. Because if paramname keep same in orWhere(). then it will overwrite last orwhere parameters so. */
-                            const paramName = `${Math.random()}_${Date.now()}`
-                            if (parentIds.length > 0) {
-                                var nextLevelAdmin = await query.subQuery()
-                                    .select("adm.id")
-                                    .from(AdminEntity, "adm")
-                                    .where("adm.role = :role", { role: roleId })
-                                    .andWhere(`"adm"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
-                                    .getMany();
-                                parentIds = [...nextLevelAdmin.map(item => { return item.id })];
-                                if (parentIds.length > 0) {
-                                    qry = qry.orWhere(`"account"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
-                                }
-                            }
+                        if (idList.length > 0) {
+                            qry = qry.orWhere(`"account"."created_by" IN (:...subLevelAdminIds)`, { subLevelAdminIds: [...idList] })
                         }
                     }));
                 } else if (admin['role'] == APP_CONST.SUB_ADMIN_ROLE) {
-                    // might be Sub admin Role
+                    // Might be Sub admin Role
                     if (currentAdmin && filter.created_by_id == currentAdmin.id) {
                         const currentSubAdminPermissions: any = await query.subQuery().select("a.permissions").from(AdminEntity, 'a').where("a.id = :id", { id: filter['created_by_id'] }).getOne();
                         logger.log(level.info, `currentSubAdmin: ${currentSubAdminPermissions}`);
@@ -130,63 +169,12 @@ export class AccountService {
             }
         }
 
-        const searchFields = {
-            'account.id': 'uuid',
-            'account.code': 'text',
-            'account.firstname': 'text',
-            "account.lastname": 'text',
-            "account.companyname": 'text',
-            "account.phone": 'text',
-            "account.address": 'text',
-            "account.postcode": 'text',
-            "account.country": 'text',
-            "account.billingemail": 'text',
-            "account.customerid": 'text',
-            "account.vat": 'text',
-            "account.packageid": 'number',
-            "account.accounttype": 'number',
-            "account.credits": 'number',
-            "account.email": 'text',
-            "account.verificationtoken": 'text',
-            "account.city": 'text',
-            "account.triallimit": 'number',
-            "account.role": 'number',
-            "account.totaldevices": 'number',
-            "account.payid": 'number',
-            "account.registrationtype": 'number',
-            "account.created_by": 'uuid',
-            "account.enduser_street": 'text',
-            "account.enduser_state": 'text',
-            "account.enduser_email": 'text',
-            "account.reseller_company": 'text',
-            "account.reseller_street": 'text',
-            "account.reseller_state": 'text',
-            "account.reseller_code": 'text',
-            "account.reseller_firstname": 'text',
-            "account.reseller_lastname": 'text',
-            "account.enduser_classification": 'text',
-            "account.reseller_email": 'text',
-            "account.packageid_dr": 'number',
-            "account.size_dr": 'number',
-            "account.totaldevices_dr": 'number',
-            "admin.username": 'text'
-        }
-
-        // const searchFields = {
-            // "account.expirydate_dr": 'date',
-            // "account.created_at": 'date',
-            // "account.updated_at": 'date',
-            // "account.expirydate": 'date',
-        // }
-
-        query = this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
-
+        query = await this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
 
         const count = await query.getCount();
         const result = { count };
 
-        query = this.queryService.ApplyPaginationToQuery(query, filter);
-
+        query = await this.queryService.ApplyPaginationToQuery(query, filter);
         if ('offset' in filter && filter.offset) {
             result['offset'] = filter['offset'];
         }
@@ -199,6 +187,16 @@ export class AccountService {
         result['data'] = data;
 
         return result;
+    }
+
+    async _getIds(query, roleId, parentIds) {
+        const paramName = `${Math.random()}_${Date.now()}`
+        return await query.subQuery()
+            .select("adm.id")
+            .from(AdminEntity, "adm")
+            .where("adm.role = :role", { role: roleId })
+            .andWhere(`"adm"."created_by" IN (:...${paramName})`, { [paramName]: [...parentIds] })
+            .getMany();
     }
 
     findAccountById(id) {
