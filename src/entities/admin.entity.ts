@@ -1,5 +1,5 @@
 
-import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import { AccountEntity } from "./account.entity";
 import { DocumentsEntity } from "./documents.entity";
@@ -60,6 +60,11 @@ export class AdminEntity {
 
     @BeforeInsert()
     async hashPassword() {
+        this.password = await bcrypt.hash(this.password, 8);
+    }
+
+    @BeforeUpdate()
+    async updatePassword() {
         this.password = await bcrypt.hash(this.password, 8);
     }
 

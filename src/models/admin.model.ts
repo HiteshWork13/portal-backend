@@ -105,7 +105,8 @@ export class UpdateAdminUser {
 
     @IsString()
     @IsNotEmpty()
-    @ApiProperty({ example: defaults.username })
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.username })
     username: string;
 
     @IsString()
@@ -143,6 +144,12 @@ export class UpdateAdminUser {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.postcode })
     postcode: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.password })
+    password: string;
 }
 export class UpdateAdminStatus {
 

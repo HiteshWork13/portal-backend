@@ -82,7 +82,8 @@ export class AdminService {
     }
 
     UpdateAdminQuery(id, body) {
-        return this.Admin.update({ id }, body)
+        const admin: any = this.Admin.create(body);
+        return this.Admin.update({ id }, admin);
     }
 
 }
