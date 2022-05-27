@@ -21,6 +21,30 @@ export class CreateAdminUser extends Login {
     @ApiProperty({ example: defaults.username })
     username: string;
 
+    @IsString()
+    @ApiProperty({ example: defaults.firstName })
+    firstname: string;
+
+    @IsString()
+    @ApiProperty({ example: defaults.lastname })
+    lastname: string;
+
+    @IsString()
+    @ApiProperty({ example: defaults.companyname })
+    company: string;
+
+    @IsString()
+    @ApiProperty({ example: defaults.street })
+    street: string;
+
+    @IsString()
+    @ApiProperty({ example: defaults.state })
+    state: string;
+
+    @IsString()
+    @ApiProperty({ example: defaults.postcode })
+    postcode: string;
+
     @IsNumber()
     @IsIn([1, 2, 3])
     @ApiProperty({ example: defaults.role })
@@ -83,6 +107,42 @@ export class UpdateAdminUser {
     @IsNotEmpty()
     @ApiProperty({ example: defaults.username })
     username: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.firstName })
+    firstname: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.lastname })
+    lastname: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.companyname })
+    company: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.street })
+    street: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.state })
+    state: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.postcode })
+    postcode: string;
 }
 export class UpdateAdminStatus {
 

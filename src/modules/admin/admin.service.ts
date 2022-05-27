@@ -28,7 +28,7 @@ export class AdminService {
 
     FindAdminByRoleIdAndCreatedId = async (filter) => {
         var query = this.Admin.createQueryBuilder()
-            .select("id, username, email, role, status, permissions, created_by, created_at, updated_at")
+            .select("id, username, firstname, lastname, company, postcode, state, street, email, role, status, permissions, created_by, created_at, updated_at")
             .where('role = :role', { role: filter['role'] })
 
         if ('created_by_id' in filter && filter.created_by_id) {
@@ -38,6 +38,11 @@ export class AdminService {
             // 'id': 'uuid',
             'username': "text",
             'email': "text",
+            'firstname': "text",
+            'lastname': "text",
+            'company': "text",
+            'street': "text",
+            'state': "text",
             // 'role': "number",
             // 'status': "number", 
             // 'created_by': "uuid",
@@ -49,7 +54,7 @@ export class AdminService {
 
         const count = await query.getCount();
         const result = { count };
-       
+
         query = this.queryService.ApplyPaginationToQuery(query, filter);
 
         if ('offset' in filter && filter.offset) {

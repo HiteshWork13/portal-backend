@@ -12,6 +12,24 @@ export class AdminEntity {
     @Column()
     username: string;
 
+    @Column({ nullable: true })
+    firstname: string;
+
+    @Column({ nullable: true })
+    lastname: string;
+
+    @Column({ nullable: true })
+    company: string;
+
+    @Column({ nullable: true })
+    street: string;
+
+    @Column({ nullable: true })
+    state: string;
+
+    @Column({ nullable: true })
+    postcode: string;
+
     @Column({ unique: true })
     email: string
 

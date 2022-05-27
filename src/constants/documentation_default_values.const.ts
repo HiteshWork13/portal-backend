@@ -30,6 +30,8 @@ export const defaults = {
     companyname: "Facit Data Systems",
     phone: 9756452178,
     address: "sd-10, sidestrial street",
+    state: "Transanvalia",
+    street: "ABC street",
     postcode: "394105",
     country: "United State",
     billingemail: "john@doi.com",
