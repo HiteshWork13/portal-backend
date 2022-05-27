@@ -61,7 +61,7 @@ export class AccountEntity {
     @Column({ collation: "default", nullable: false })
     email: string;
 
-    @Column({ default: false })
+    @Column({ default: true })
     emailverified: Boolean;
 
     @Column({ collation: "default", nullable: true })
