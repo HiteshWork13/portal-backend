@@ -155,7 +155,7 @@ export class AdminController {
                 [APP_CONST.ADMIN_ROLE]: [APP_CONST.SUB_ADMIN_ROLE]
             }
             const toBeUpdateAdmin = await this.adminService.FindAdminById(param);
-            if (admin_updation_access[currentAdmin['role']] && admin_updation_access[currentAdmin['role']].indexOf(toBeUpdateAdmin['role']) >= 0) {
+            if ((admin_updation_access[currentAdmin['role']] && admin_updation_access[currentAdmin['role']].indexOf(toBeUpdateAdmin['role']) >= 0) || currentAdmin.id == param) {
                 const updated = await this.adminService.UpdateAdminQuery(param, body);
                 logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
