@@ -84,7 +84,6 @@ export class AdminService {
 
     UpdateAdminQuery(id, body) {
         const admin: any = this.Admin.create(body);
-        console.log('admin: ', admin);
         return this.Admin.update({ id }, admin);
     }
 
