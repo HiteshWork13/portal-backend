@@ -28,7 +28,7 @@ export class AdminService {
 
     FindAdminByRoleIdAndCreatedId = async (filter) => {
         var query = this.Admin.createQueryBuilder()
-            .select("id, username, firstname, lastname, company, postcode, state, street, email, role, status, permissions, created_by, created_at, updated_at")
+            .select("id, username, firstname, lastname, company, postcode, state, street, reseller_default_email, email, role, status, permissions, created_by, created_at, updated_at")
             .where('role = :role', { role: filter['role'] })
 
         if ('created_by_id' in filter && filter.created_by_id) {
@@ -43,6 +43,7 @@ export class AdminService {
             'company': "text",
             'street': "text",
             'state': "text",
+            'reseller_default_email': "text",
             // 'role': "number",
             // 'status': "number", 
             // 'created_by': "uuid",
@@ -83,6 +84,7 @@ export class AdminService {
 
     UpdateAdminQuery(id, body) {
         const admin: any = this.Admin.create(body);
+        console.log('admin: ', admin);
         return this.Admin.update({ id }, admin);
     }
 

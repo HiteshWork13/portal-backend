@@ -45,6 +45,10 @@ export class CreateAdminUser extends Login {
     @ApiProperty({ example: defaults.postcode })
     postcode: string;
 
+    @IsString()
+    @ApiProperty({ example: defaults.email })
+    reseller_default_email: string;
+
     @IsNumber()
     @IsIn([1, 2, 3])
     @ApiProperty({ example: defaults.role })
@@ -144,6 +148,12 @@ export class UpdateAdminUser {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.postcode })
     postcode: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.email })
+    reseller_default_email: string;
 
     @IsString()
     @IsNotEmpty()

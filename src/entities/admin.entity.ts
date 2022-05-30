@@ -30,6 +30,9 @@ export class AdminEntity {
     @Column({ nullable: true })
     postcode: string;
 
+    @Column({ unique: true, nullable: true })
+    reseller_default_email: string
+
     @Column({ unique: true })
     email: string
 
@@ -65,7 +68,8 @@ export class AdminEntity {
 
     @BeforeUpdate()
     async updatePassword() {
-        this.password = await bcrypt.hash(this.password, 8);
+        if (this.password)
+            this.password = await bcrypt.hash(this.password, 8);
     }
 
     async validatePassword(password: string): Promise<boolean> {
