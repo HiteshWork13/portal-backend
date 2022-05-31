@@ -174,7 +174,7 @@ export class AccountService {
         const count = await query.getCount();
         const result = { count };
 
-        query = await this.queryService.ApplyPaginationToQuery(query, filter);
+        query = await this.queryService.ApplyPaginationToQuery(query, filter, 'account');
         if ('offset' in filter && filter.offset) {
             result['offset'] = filter['offset'];
         }
