@@ -18,10 +18,6 @@ export class Login {
 export class CreateAdminUser extends Login {
 
     @IsString()
-    @ApiProperty({ example: defaults.username })
-    username: string;
-
-    @IsString()
     @ApiProperty({ example: defaults.firstName })
     firstname: string;
 
@@ -44,10 +40,6 @@ export class CreateAdminUser extends Login {
     @IsString()
     @ApiProperty({ example: defaults.postcode })
     postcode: string;
-
-    @IsString()
-    @ApiProperty({ example: defaults.email })
-    reseller_default_email: string;
 
     @IsNumber()
     @IsIn([1, 2, 3])
@@ -110,12 +102,6 @@ export class UpdateAdminUser {
     @IsString()
     @IsNotEmpty()
     @IsOptional()
-    @ApiPropertyOptional({ example: defaults.username })
-    username: string;
-
-    @IsString()
-    @IsNotEmpty()
-    @IsOptional()
     @ApiPropertyOptional({ example: defaults.firstName })
     firstname: string;
 
@@ -148,12 +134,6 @@ export class UpdateAdminUser {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.postcode })
     postcode: string;
-
-    @IsString()
-    @IsNotEmpty()
-    @IsOptional()
-    @ApiPropertyOptional({ example: defaults.email })
-    reseller_default_email: string;
 
     @IsString()
     @IsNotEmpty()

@@ -104,7 +104,7 @@ export class AccountService {
             // "account.packageid_dr": 'number',
             // "account.size_dr": 'number',
             // "account.totaldevices_dr": 'number',
-            "admin.username": 'text'
+            "admin.firstname": 'text'
         }
         var hirarchy = {
             [APP_CONST.SUPER_ADMIN_ROLE]: [APP_CONST.ADMIN_ROLE, APP_CONST.SUB_ADMIN_ROLE],

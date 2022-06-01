@@ -9,9 +9,6 @@ export class AdminEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
-    username: string;
-
     @Column({ nullable: true })
     firstname: string;
 
@@ -29,9 +26,6 @@ export class AdminEntity {
 
     @Column({ nullable: true })
     postcode: string;
-
-    @Column({ unique: true, nullable: true })
-    reseller_default_email: string
 
     @Column({ unique: true })
     email: string
