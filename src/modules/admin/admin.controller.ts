@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, HttpStatus, Param, Post, Put, Request, Response, UnauthorizedException, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { APP_CONST, ERROR_CONST } from 'src/constants';
@@ -114,7 +114,7 @@ export class AdminController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            'search_query' in body ? filter['search_query'] = body['search_query'] : null ;
+            'search_query' in body ? filter['search_query'] = body['search_query'] : null;
 
             const list: any = await this.adminService.FindAdminByRoleIdAndCreatedId(filter);
             logger.log(level.info, `Admin List: ${this.utils.beautify(list)}`);
@@ -156,6 +156,16 @@ export class AdminController {
             }
             const toBeUpdateAdmin = await this.adminService.FindAdminById(param);
             if ((admin_updation_access[currentAdmin['role']] && admin_updation_access[currentAdmin['role']].indexOf(toBeUpdateAdmin['role']) >= 0) || currentAdmin.id == param) {
+                if ('old_password' in body) {
+                    if (!(await toBeUpdateAdmin?.validatePassword(body['old_password']))) {
+                        return this.utils.sendJSONResponse(res, HttpStatus.FORBIDDEN, {
+                            success: false,
+                            statusCode: HttpStatus.FORBIDDEN,
+                            message: ERROR_CONST.OLD_PASSWORD_WRONG,
+                            data: {}
+                        })
+                    }
+                }
                 const updated = await this.adminService.UpdateAdminQuery(param, body);
                 logger.log(level.info, `updated: ${this.utils.beautify(updated)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {

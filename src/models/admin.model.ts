@@ -140,6 +140,12 @@ export class UpdateAdminUser {
     @IsOptional()
     @ApiPropertyOptional({ example: defaults.password })
     password: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiPropertyOptional({ example: defaults.password })
+    old_password: string;
 }
 export class UpdateAdminStatus {
 
