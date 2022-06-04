@@ -1,4 +1,5 @@
 export const defaults = {
+    id: "1",
     username: "john",
     email: "john@gmail.com",
     password: "john@123",
@@ -57,5 +58,10 @@ export const defaults = {
     size_dr: 0,
     totaldevices_dr: 1,
     expirydate_dr: "2021-10-29",
-    communicationstatus: 0
+    communicationstatus: 0,
+    packageName: "QaslfKMD456fd",
+    cost: 100,
+    lengthcost: 150,
+    exportcost: 200,
+    planid: 1
 };
