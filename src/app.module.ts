@@ -9,6 +9,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AccountModule } from './modules/account/account.module';
 import { DocumentModule } from './modules/document/document.module';
 import { DeviceModule } from './modules/device/device.module';
+import { HistoryExportModule } from './modules/history-export/history-export.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -29,7 +30,8 @@ import { DeviceModule } from './modules/device/device.module';
     AdminModule,
     AccountModule,
     DocumentModule,
-    DeviceModule
+    DeviceModule,
+    HistoryExportModule
   ],
   controllers: [AppController],
   providers: [AppService],
