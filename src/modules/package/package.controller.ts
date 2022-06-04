@@ -83,7 +83,7 @@ export class PackageController {
         }
     }
 
-    @ApiTags('Admin')
+    @ApiTags('Package')
     @ApiParam({ name: 'id' })
     @ApiBody({ type: UpdatePackage })
     @ApiResponse({ type: UpdatePackageRes })
@@ -116,7 +116,7 @@ export class PackageController {
         }
     }
 
-    @ApiTags('Admin')
+    @ApiTags('Package')
     @ApiParam({ name: 'id' })
     @ApiResponse({ type: DeletePackageResponse })
     @ApiBearerAuth("access_token")
