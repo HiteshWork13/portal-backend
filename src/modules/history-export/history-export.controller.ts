@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { level, logger } from 'src/config';
 import { ERROR_CONST } from 'src/constants';
@@ -19,7 +19,7 @@ export class HistoryExportController {
     @ApiResponse({ type: getAllHistoryRes })
     @ApiBearerAuth("access_token")
     @UseGuards(JwtAuthGuard)
-    @Get('getAllHistory')
+    @Post('getAllHistory')
     async getAllHistory(@Body() body: getAllHistoryReq, @Res() res) {
         try {
             // this.historyExportService.insertDefault();
