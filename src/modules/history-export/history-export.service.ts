@@ -38,7 +38,7 @@ export class HistoryExportService {
             'version': 'text'
         }
 
-        var query = this.History.createQueryBuilder('history').select()
+        var query = this.History.createQueryBuilder('history')
             .where('history.client_id = :client_id', { client_id: filter['client_id'] })
 
         query = await this.queryService.ApplySearchToQuery(query, filter, Object.entries(searchFields));
@@ -46,7 +46,7 @@ export class HistoryExportService {
         const count = await query.getCount();
         const result = { count };
 
-        query = await this.queryService.ApplyPaginationToQuery(query, filter, 'account');
+        query = await this.queryService.ApplyPaginationToQuery(query, filter, 'history');
         if ('offset' in filter && filter.offset) {
             result['offset'] = filter['offset'];
         }
