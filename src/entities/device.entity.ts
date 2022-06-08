@@ -2,7 +2,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { AccountEntity } from "./account.entity";
 
-@Entity("Device")
+@Entity("productkey")
 export class DeviceEntity {
 
     @PrimaryColumn({ type: "int", nullable: false })
@@ -11,7 +11,7 @@ export class DeviceEntity {
     @Column()
     userid
 
-    @ManyToOne(() => AccountEntity, (Account) => Account.id)
+    @ManyToOne(() => AccountEntity, (account) => account.id)
     @JoinColumn({ name: 'userid' })
     user: string;
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { level, logger } from 'src/config';
-import { DocumentsEntity } from 'src/entities/documents.entity';
+import { PODocumentsEntity } from 'src/entities/documents.entity';
 import { Document } from 'src/models/document.model';
 import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
@@ -11,8 +11,8 @@ import { Repository } from 'typeorm';
 export class DocumentService {
 
     constructor(
-        @InjectRepository(DocumentsEntity)
-        private Document: Repository<DocumentsEntity>,
+        @InjectRepository(PODocumentsEntity)
+        private Document: Repository<PODocumentsEntity>,
         private utils: UtilsService,
         private queryService: QueryService
     ) {

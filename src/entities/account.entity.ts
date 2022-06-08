@@ -1,10 +1,10 @@
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { AdminEntity } from "./admin.entity";
 import * as bcrypt from 'bcrypt';
-import { DocumentsEntity } from "./documents.entity";
+import { PODocumentsEntity } from "./documents.entity";
 
 
-@Entity('Account')
+@Entity('account')
 export class AccountEntity {
 
     @PrimaryGeneratedColumn('uuid')
@@ -97,7 +97,7 @@ export class AccountEntity {
     @Column({ nullable: true })
     created_by: AdminEntity;
     
-    @ManyToOne(() => AdminEntity, (Admin) => Admin.id)
+    @ManyToOne(() => AdminEntity, (admin) => admin.id)
     @JoinColumn({ name: "created_by" })
     created_by_id: AdminEntity;
 

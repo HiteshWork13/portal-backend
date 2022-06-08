@@ -3,15 +3,15 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGene
 import { AdminEntity } from "./admin.entity";
 import { AccountEntity } from "./account.entity";
 
-@Entity("Documents")
-export class DocumentsEntity {
+@Entity("podocuments")
+export class PODocumentsEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column()
     uploaded_by_id: AdminEntity;
 
-    @ManyToOne(() => AdminEntity, (Admin) => Admin.id, { nullable: true })
+    @ManyToOne(() => AdminEntity, (admin) => admin.id, { nullable: true })
     @JoinColumn({ name: "uploaded_by_id" })
     uploaded_by: AdminEntity;
 
@@ -32,7 +32,7 @@ export class DocumentsEntity {
     @Column({ nullable: true })
     upload_for_account_id: AccountEntity;
 
-    @ManyToOne(() => AccountEntity, (Account) => Account.id, { onDelete: 'CASCADE' })
+    @ManyToOne(() => AccountEntity, (account) => account.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'upload_for_account_id' })
     upload_for_account: AccountEntity;
 
