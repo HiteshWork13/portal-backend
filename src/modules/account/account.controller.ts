@@ -71,6 +71,14 @@ export class AccountController {
                     });
                 }
                 uploadedFile = await this.uploadService.uploadFileToDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH), body.file);
+                if(!uploadedFile) {
+                    return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                        success: false,
+                        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                        message: po_error,
+                        error: ERROR_CONST.INTERNAL_SERVER_ERROR
+                    });
+                }
             }
 
             const input: CreateAccount = payload;
@@ -89,6 +97,8 @@ export class AccountController {
                 const newDocument = await this.documentService.createDocument(document);
                 logger.log(level.info, `New Document Inserted:${this.utils.beautify(newDocument)}`);
                 inserted['document'] = newDocument;
+            } else {
+                
             }
 
             return this.utils.sendJSONResponse(res, HttpStatus.OK, {
