@@ -71,7 +71,7 @@ export class AccountController {
                     });
                 }
                 uploadedFile = await this.uploadService.uploadFileToDest(path.join(__dirname, '../..', process.env.ASSET_ROOT, process.env.PO_FILES_PATH), body.file);
-                if(!uploadedFile) {
+                if (!uploadedFile) {
                     return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
                         success: false,
                         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -98,7 +98,7 @@ export class AccountController {
                 logger.log(level.info, `New Document Inserted:${this.utils.beautify(newDocument)}`);
                 inserted['document'] = newDocument;
             } else {
-                
+
             }
 
             return this.utils.sendJSONResponse(res, HttpStatus.OK, {
@@ -335,7 +335,7 @@ export class AccountController {
                 "limit": body['limit'],
                 "order": body['order'],
             }
-            'search_query' in body ? filter['search_query'] = body['search_query'] : null ;
+            'search_query' in body ? filter['search_query'] = body['search_query'] : null;
             const currentAdmin: AdminUser = await this.queryService.FindAdminByEmailOnly(req.user.email);
             logger.log(level.info, `currentAdmin: ${this.utils.beautify(currentAdmin)}`);
             const accounts: any = await this.accountService.getAccountsByAdminAndSubAdmin(filter, currentAdmin);
