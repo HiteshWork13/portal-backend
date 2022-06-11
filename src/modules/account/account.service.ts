@@ -212,10 +212,11 @@ export class AccountService {
     }
 
     deleteAccountQuery(id) {
-        return this.Account.createQueryBuilder()
+        /* return this.Account.createQueryBuilder()
             .delete()
-            .from('Account')
-            .where('id = :id', { id })
+            .from('account')
+            .where('id = :id', { id }) */
+        return this.Account.delete({ id })
     }
 
 }

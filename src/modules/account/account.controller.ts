@@ -264,7 +264,7 @@ export class AccountController {
                     });
                 }
             }
-            const deleted = await this.accountService.deleteAccountQuery(id).execute();
+            const deleted = await this.accountService.deleteAccountQuery(id);
             logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
             this.utils.sendJSONResponse(res, HttpStatus.OK, {
                 success: true,

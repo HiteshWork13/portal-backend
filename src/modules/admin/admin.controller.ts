@@ -210,7 +210,7 @@ export class AdminController {
             }
             const toBeDeleteAdmin = await this.adminService.FindAdminById(id);
             if (toBeDeleteAdmin && admin_creation_access[currentAdmin['role']] && admin_creation_access[currentAdmin['role']].indexOf(toBeDeleteAdmin['role']) >= 0) {
-                const deleted = await this.adminService.DeleteAdminQuery(id).execute();
+                const deleted = await this.adminService.DeleteAdminQuery(id);
                 logger.log(level.info, `deleted: ${this.utils.beautify(deleted)}`);
                 this.utils.sendJSONResponse(res, HttpStatus.OK, {
                     success: true,

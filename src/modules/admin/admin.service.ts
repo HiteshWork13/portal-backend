@@ -74,10 +74,11 @@ export class AdminService {
     }
 
     DeleteAdminQuery(id) {
-        return this.Admin.createQueryBuilder()
+        /* return this.Admin.createQueryBuilder()
             .delete()
-            .from('Admin')
-            .where('id = :id', { id })
+            .from('admin')
+            .where('id = :id', { id }) */
+        return this.Admin.delete({ id });
     }
 
     UpdateAdminQuery(id, body) {
