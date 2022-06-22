@@ -51,4 +51,30 @@ export class HistoryExportController {
             });
         }
     }
+
+    @ApiTags('History Export')
+    @ApiBearerAuth("access_token")
+    @UseGuards(JwtAuthGuard)
+    @Post('getOlderClient')
+    async getOlderClient(@Res() res) {
+        try {
+            logger.log(level.info, `getOlderClient`);
+            
+            const history: any = await this.historyExportService.getOlderClient();
+            const response = {
+                success: true,
+                message: "Fetched SuccessFully",
+                data: history.data
+            };
+            return this.utils.sendJSONResponse(res, HttpStatus.OK, response);
+
+        } catch (error) {
+            logger.log(level.error, `getOlderClient Error=${error}`);
+            return this.utils.sendJSONResponse(res, HttpStatus.INTERNAL_SERVER_ERROR, {
+                success: false,
+                message: ERROR_CONST.INTERNAL_SERVER_ERROR,
+                data: error
+            });
+        }
+    }
 }
