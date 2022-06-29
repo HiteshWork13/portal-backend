@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,9 +14,10 @@ import { IsInNestedRule } from './validators/is-in-nested.validator';
         JwtModule.register({
             secret: process.env.JWT_ADMIN_TOKEN_SECRET
         }),
-        TypeOrmModule.forFeature([AdminEntity])
+        TypeOrmModule.forFeature([AdminEntity]),
+        HttpModule
     ],
     providers: [JwtService, UtilsService, QueryService, FileUploadService, IsInNestedRule],
-    exports: [JwtService, UtilsService, QueryService, FileUploadService, JwtModule]
+    exports: [JwtService, UtilsService, QueryService, FileUploadService, JwtModule, HttpModule]
 })
 export class SharedModule { }
