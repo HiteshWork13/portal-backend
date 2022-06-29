@@ -152,7 +152,7 @@ export class HistoryExportService {
 
     async getOlderClient2() {
         const yesterday = moment().subtract(1, "days").format("YYYY-MM-DD");
-        logger.log(level.info, `yesterday:${yesterday}`);
+        // logger.log(level.info, `yesterday:${yesterday}`);
 
         var yesterdaysRecord = this.History.createQueryBuilder("h")
             .select("h.client_id", "client_id")
@@ -193,10 +193,9 @@ export class HistoryExportService {
             .where("sub.client_id = account_sub_qry.client_id")
             .andWhere("sub.row_number = 2");
         var prevRecordsResult = await prevRecords.getRawMany();
-        logger.log(level.info, `previous records Query: ${prevRecords.getQuery()}`);
+        // logger.log(level.info, `previous records Query: ${prevRecords.getQuery()}`);
         prevRecordsResult = _.merge(prevRecordsResult, yesterdayRecordsResult);
         const result = {};
-        // let abc = this.updateHubspot(prevRecordsResult);
         this.updateHubspot(prevRecordsResult);
         // logger.log(level.info, `ABC:${this.utils.beautify(abc)}`);
         result["data"] = prevRecordsResult;
@@ -204,37 +203,22 @@ export class HistoryExportService {
     }
 
     updateHubspot(data) {
-        this.body = [];
-        const obj = {};
-        // let date: any = "2022-06-27T22:39:05.206Z";
-        let date = new Date();
-        let now_utc = Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate()
-        );
-        // ,date.setUTCHours(0,0,0,0)
-
-        logger.log(
-            level.info,
-            `O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O-O: ${now_utc}`
-        );
-
         var body1 = [
             {
                 email: "super_acc12345@gmail.com",
                 properties: [
                     {
                         property: "last_used",
-                        value: this.getDateFormat("2022-06-27T22:39:05.206Z"),
+                        value: this.getDateFormat("2022-06-20T22:39:05.206Z"),
                     },
                     {
                         property: "previously_used",
-                        value: this.getDateFormat("2022-06-26T22:39:05.206Z"),
+                        value: this.getDateFormat("2022-06-19T22:39:05.206Z"),
                     },
                 ],
             },
         ];
+        logger.log(level.info, `O-O-O-O-O-O-O-O-O-O-O-O--O-OO-O-O-O-O-O-O-OO-S:${this.utils.beautify(body1)}`);
         this.httpService.post(
             `https://api.hubapi.com/contacts/v1/contact/batch/?hapikey=${this.api_key}`,
             body1
@@ -242,14 +226,19 @@ export class HistoryExportService {
     }
 
     getDateFormat(date: any) {
-        return Date.UTC(
+        let qw: any = Date.parse(date);
+        date = new Date(qw);
+        let f_date = Date.UTC(
             date.getUTCFullYear(),
             date.getUTCMonth(),
             date.getUTCDate()
         );
+        return f_date
     }
 
     hubspotPropertyFormat() {
+        // this.body = [];
+        // const obj = {};
         /* data.forEach((element) => {
           if (element.email !== undefined) {
             logger.log(level.info, `HERE EMAIL IS: ${element.email}`);
