@@ -5,6 +5,9 @@ import { QueryService } from 'src/shared/services/query.service';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { Brackets, Repository } from 'typeorm';
 import moment from "moment";
+import * as _ from "lodash";
+import { level, logger } from 'src/config';
+import { AccountEntity } from 'src/entities/account.entity';
 
 @Injectable()
 export class HistoryExportService {
@@ -12,6 +15,8 @@ export class HistoryExportService {
     constructor(
         @InjectRepository(HistoryExportEntity)
         private History: Repository<HistoryExportEntity>,
+        @InjectRepository(AccountEntity)
+        private Account: Repository<AccountEntity>,
         private utils: UtilsService,
         private queryService: QueryService
     ) {
@@ -99,6 +104,50 @@ export class HistoryExportService {
         const result = {};
         const data = await mainQuery.getMany();
         result['data'] = data;
+        return result;
+    }
+
+    async getOlderClient2() {
+        const yesterday = moment().subtract(1, 'days').format("YYYY-MM-DD");
+        logger.log(level.info, `yesterday:${yesterday}`);
+
+        var yesterdaysRecord = this.History.createQueryBuilder('h')
+            .select("h.client_id", 'client_id')
+            .addSelect("h.timestamp", 'yesterday_exported')
+            .distinctOn(['h.client_id'])
+            .where("to_char(h.timestamp, 'YYYY-MM-DD') = :yesterday", { yesterday })
+        var yesterdayRecordsResult: Array<any> = await yesterdaysRecord.getRawMany()
+        console.log('prevRecordsResult: ', yesterdayRecordsResult);
+        const yesterdaysId = yesterdayRecordsResult.map(item => { return item.client_id })
+        // const yesterdaysId = [];
+
+        var subquery = this.History.createQueryBuilder('h')
+            .select(`ROW_NUMBER()  OVER ( PARTITION BY client_id  ORDER BY "timestamp" DESC)`, 'row_number')
+            .addSelect('h.*')
+            .addSelect("h.timestamp", 'previously_exported')
+            .where('h.client_id IN (:...yesterdaysId)', { yesterdaysId })
+
+        /* Join with account table to get email id which has yesterday's record in export history */
+        var subquery2 = this.Account.createQueryBuilder('account')
+            .select('account.enduser_email', 'email')
+            .addSelect('account.id', 'client_id')
+            .where('account.id IN (:...yesterdaysId)', { yesterdaysId })
+
+        var prevRecords = this.History.createQueryBuilder('x')
+            .select("sub.*")
+            .addSelect("account_sub_qry.*")
+            .distinctOn(['account_sub_qry.client_id'])
+            .from(`(${subquery.getQuery()})`, 'sub')
+            .addFrom(`(${subquery2.getQuery()})`, 'account_sub_qry')
+            .setParameters(subquery.getParameters())
+            .setParameters(subquery2.getParameters())
+            .where('sub.client_id = account_sub_qry.client_id')
+            .andWhere('sub.row_number = 2')
+        var prevRecordsResult = await prevRecords.getRawMany();
+        logger.log(level.info, `previous records Query: ${prevRecords.getQuery()}`)
+        prevRecordsResult = _.merge(prevRecordsResult, yesterdayRecordsResult)
+        const result = {};
+        result['data'] = prevRecordsResult;
         return result;
     }
 

@@ -33,6 +33,7 @@
     "class-validator": "^0.13.2",
     "cors": "^2.8.5",
     "express-http-context": "^1.2.4",
+    "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
     "moment": "^2.29.3",
     "nestjs-form-data": "^1.6.3",

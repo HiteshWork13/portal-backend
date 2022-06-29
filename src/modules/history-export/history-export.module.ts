@@ -6,10 +6,11 @@ import { HistoryExportEntity } from 'src/entities/history_export.entity';
 import { SharedModule } from 'src/shared/shared.module';
 import { AccountModule } from '../account/account.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import { AccountEntity } from 'src/entities/account.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([HistoryExportEntity]),
+    TypeOrmModule.forFeature([HistoryExportEntity, AccountEntity]),
     SharedModule,
     NestjsFormDataModule,
     forwardRef(() => AccountModule)

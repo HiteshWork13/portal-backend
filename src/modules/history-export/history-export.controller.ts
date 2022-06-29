@@ -60,7 +60,7 @@ export class HistoryExportController {
         try {
             logger.log(level.info, `getOlderClient`);
             
-            const history: any = await this.historyExportService.getOlderClient();
+            const history: any = await this.historyExportService.getOlderClient2();
             const response = {
                 success: true,
                 message: "Fetched SuccessFully",
