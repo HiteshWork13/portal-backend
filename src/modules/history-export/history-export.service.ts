@@ -203,22 +203,22 @@ export class HistoryExportService {
     }
 
     updateHubspot(data) {
-        var body1 = [
+        let body1 = [
             {
                 email: "super_acc12345@gmail.com",
                 properties: [
                     {
                         property: "last_used",
-                        value: this.getDateFormat("2022-06-20T22:39:05.206Z"),
+                        value: 1655683200000,
                     },
                     {
                         property: "previously_used",
-                        value: this.getDateFormat("2022-06-19T22:39:05.206Z"),
+                        value: 1655596800000,
                     },
-                ],
-            },
+                ]
+            }
         ];
-        logger.log(level.info, `O-O-O-O-O-O-O-O-O-O-O-O--O-OO-O-O-O-O-O-O-OO-S:${this.utils.beautify(body1)}`);
+      
         this.httpService.post(
             `https://api.hubapi.com/contacts/v1/contact/batch/?hapikey=${this.api_key}`,
             body1
@@ -233,6 +233,7 @@ export class HistoryExportService {
             date.getUTCMonth(),
             date.getUTCDate()
         );
+        logger.log(level.info, `O-O-O-O-O-O-O-O-O-O-O-O--O-OO-O-O-O-O-O-O-OO-S:${this.utils.beautify(f_date)}`);
         return f_date
     }
 
