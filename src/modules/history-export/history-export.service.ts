@@ -2,17 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { HistoryExportEntity } from "src/entities/history_export.entity";
 import { QueryService } from "src/shared/services/query.service";
-import { UtilsService } from "src/shared/services/utils.service";
 import { Brackets, Repository } from "typeorm";
 import moment from "moment";
 import * as _ from "lodash";
-import { level, logger } from "src/config";
 import { AccountEntity } from "src/entities/account.entity";
 import { Cron } from "@nestjs/schedule";
-import { AxiosResponse } from "axios";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
-import { HttpService } from "@nestjs/axios";
 
 @Injectable()
 
@@ -26,16 +20,13 @@ import { HttpService } from "@nestjs/axios";
 export class HistoryExportService {
   api_key = "8f2d5b03-5c9f-4e96-b386-a47a598422ce";
   body: Array<any>;
-  resp: any;
 
   constructor(
     @InjectRepository(HistoryExportEntity)
     private History: Repository<HistoryExportEntity>,
     @InjectRepository(AccountEntity)
     private Account: Repository<AccountEntity>,
-    private utils: UtilsService,
-    private queryService: QueryService,
-    private readonly httpService: HttpService
+    private queryService: QueryService
   ) {}
 
   @Cron("0 0 * * *", {
@@ -205,28 +196,84 @@ export class HistoryExportService {
     prevRecordsResult = _.merge(prevRecordsResult, yesterdayRecordsResult);
     const result = {};
     let query_data = this.hubspotPropertyFormat(prevRecordsResult);
-    let data_2 = this.updateHubspot(query_data);
+    // let data_2 = this.v3ApiHubspot(query_data);          /* V3 api with error */
+    this.v1ApiHubspot(prevRecordsResult)           /* V1 api which updates only one contact at a time */
     result["data"] = prevRecordsResult;
     // result["data"] = data_2;
     return result;
   }
 
-  updateHubspot(body) {
+  v1ApiHubspot(data) {
+    console.log("data: ", JSON.stringify(data));
     var request = require("request");
     var options = {
       method: "POST",
       url: "https://api.hubapi.com/contacts/v1/contact/batch/",
       qs: { hapikey: this.api_key },
       headers: { "Content-Type": "application/json" },
-      body: body,
+      body: [
+        {
+          email: "nis.tama@gmail.com",
+          properties: [
+            { property: "last_used", value: "1656374400000" },
+            { property: "previously_used", value: "165628800000" },
+          ],
+        },
+        {
+            email: "super_acc@gmail.com",
+            properties: [
+              { property: "last_used", value: "1656374400000" },
+              { property: "previously_used", value: "165628800000" },
+            ],
+          },
+      ],
       json: true,
     };
+    console.log("options: ", JSON.stringify(options));
     request(options, async function (error, response, body) {
+      console.log("API CALLED");
+      console.log("response.statusCode: ", response.statusCode);
+      console.log("response: ", response);
       if (error) throw new Error(error);
       this.body = [];
-      this.resp = error || { statusCode: response.statusCode };
-      return this.resp;
     });
+  }
+
+  v3ApiHubspot(data) {
+    const hubspot = require("@hubspot/api-client");
+
+    const hubspotClient = new hubspot.Client({ apiKey: this.api_key });
+
+    const BatchInputSimplePublicObjectBatchInput = {
+      inputs :
+      [
+        {
+          email: "nis.tama@gmail.com",
+          properties: [
+            { property: "last_used", value: "1656374400000" },
+            { property: "previously_used", value: "165628800000" },
+          ],
+        },
+        {
+            email: "super_acc@gmail.com",
+            properties: [
+              { property: "last_used", value: "1656374400000" },
+              { property: "previously_used", value: "165628800000" },
+            ],
+          },
+      ]
+    };
+
+    try {
+      const apiResponse = hubspotClient.crm.contacts.batchApi.update(
+        BatchInputSimplePublicObjectBatchInput
+      );
+      console.log(JSON.stringify(apiResponse.body, null, 2));
+    } catch (e) {
+      e.message === "HTTP request failed"
+        ? console.error('response', JSON.stringify(e.response, null, 2))
+        : console.error(e);
+    }
   }
 
   getDateFormat(date: any) {
@@ -245,7 +292,6 @@ export class HistoryExportService {
     const obj = {};
     data.forEach((element) => {
       if (element.email !== undefined) {
-        obj["email"] = element.email;
         let temp_arr = [
           {
             property: "last_used",
@@ -256,6 +302,7 @@ export class HistoryExportService {
             value: this.getDateFormat(element.previously_exported),
           },
         ];
+        obj["email"] = element.email;
         obj["properties"] = temp_arr;
         this.body.push(obj);
       }
