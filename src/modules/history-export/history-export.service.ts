@@ -195,85 +195,105 @@ export class HistoryExportService {
     var prevRecordsResult = await prevRecords.getRawMany();
     prevRecordsResult = _.merge(prevRecordsResult, yesterdayRecordsResult);
     const result = {};
-    let query_data = this.hubspotPropertyFormat(prevRecordsResult);
-    // let data_2 = this.v3ApiHubspot(query_data);          /* V3 api with error */
-    this.v1ApiHubspot(prevRecordsResult)           /* V1 api which updates only one contact at a time */
+    await this.v1ApiHubspot().then((response) => {
+      let abc = this.mapHubspotContacts(prevRecordsResult, response);
+    });
     result["data"] = prevRecordsResult;
-    // result["data"] = data_2;
     return result;
   }
 
-  v1ApiHubspot(data) {
-    console.log("data: ", JSON.stringify(data));
-    var request = require("request");
-    var options = {
-      method: "POST",
-      url: "https://api.hubapi.com/contacts/v1/contact/batch/",
-      qs: { hapikey: this.api_key },
-      headers: { "Content-Type": "application/json" },
-      body: [
-        {
-          email: "nis.tama@gmail.com",
-          properties: [
-            { property: "last_used", value: "1656374400000" },
-            { property: "previously_used", value: "165628800000" },
-          ],
-        },
-        {
-            email: "super_acc@gmail.com",
-            properties: [
-              { property: "last_used", value: "1656374400000" },
-              { property: "previously_used", value: "165628800000" },
-            ],
-          },
-      ],
-      json: true,
-    };
-    console.log("options: ", JSON.stringify(options));
-    request(options, async function (error, response, body) {
-      console.log("API CALLED");
-      console.log("response.statusCode: ", response.statusCode);
-      console.log("response: ", response);
-      if (error) throw new Error(error);
-      this.body = [];
-    });
-  }
-
-  v3ApiHubspot(data) {
+  readContacts() {
     const hubspot = require("@hubspot/api-client");
 
     const hubspotClient = new hubspot.Client({ apiKey: this.api_key });
 
-    const BatchInputSimplePublicObjectBatchInput = {
-      inputs :
-      [
-        {
-          email: "nis.tama@gmail.com",
-          properties: [
-            { property: "last_used", value: "1656374400000" },
-            { property: "previously_used", value: "165628800000" },
-          ],
-        },
-        {
-            email: "super_acc@gmail.com",
-            properties: [
-              { property: "last_used", value: "1656374400000" },
-              { property: "previously_used", value: "165628800000" },
-            ],
-          },
-      ]
-    };
+    const limit = 10;
+    const archived = false;
+    const after = undefined;
+    const properties = undefined;
+    const propertiesWithHistory = undefined;
+    const associations = undefined;
+
+    try {
+      const apiResponse = hubspotClient.crm.contacts.basicApi.getPage(
+        limit,
+        after,
+        properties,
+        propertiesWithHistory,
+        associations,
+        archived
+      );
+    } catch (e) {
+      e.message === "HTTP request failed"
+        ? console.error(JSON.stringify(e.response, null, 2))
+        : console.error(e);
+    }
+  }
+
+  v1ApiHubspot(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      var request = require("request");
+      var options = {
+        method: "GET",
+        url: "https://api.hubapi.com/crm/v3/objects/contacts",
+        qs: { hapikey: this.api_key, limit: 10, archived: false },
+        headers: { "Content-Type": "application/json" },
+        json: true,
+      };
+      request(options, async function (error, response, body) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response.body["results"]);
+        }
+      });
+    });
+  }
+
+  mapHubspotContacts(allClients, data) {
+    let tempArr = [];
+    data.forEach((element) => {
+      tempArr[element.properties.email] = element;
+    });
+    this.body = [];
+    allClients.forEach((user) => {
+      const obj = {};
+      if (tempArr[user.email]) {
+        let temp_arr = {
+          last_used: this.getDateFormat(user.yesterday_exported),
+          previously_used: this.getDateFormat(user.previously_exported),
+        };
+        obj["id"] = tempArr[user.email].id;
+        obj["properties"] = temp_arr
+        this.body.push(obj);
+      }
+    });
+     this.v3ApiHubspot(this.body);
+  }
+
+  v3ApiHubspot(body) : Promise<any> {
+    return new Promise((resolve, reject) => {
+    const hubspot = require("@hubspot/api-client");
+
+    const hubspotClient = new hubspot.Client({ apiKey: this.api_key });
+
+    const BatchInputSimplePublicObjectBatchInput = { inputs: body };
 
     try {
       const apiResponse = hubspotClient.crm.contacts.batchApi.update(
         BatchInputSimplePublicObjectBatchInput
       );
-      console.log(JSON.stringify(apiResponse.body, null, 2));
     } catch (e) {
-      e.message === "HTTP request failed"
-        ? console.error('response', JSON.stringify(e.response, null, 2))
-        : console.error(e);
+      // e.message === "HTTP request failed"
+      //   ? console.error("response", JSON.stringify(e.response, null, 2))
+      //   : console.error("error", e);
+      if (e.message === "HTTP request failed") {
+        reject(e);
+      } else {
+        resolve(e.response);
+      }
     }
+    })
   }
 
   getDateFormat(date: any) {
@@ -284,29 +304,6 @@ export class HistoryExportService {
       date.getUTCMonth(),
       date.getUTCDate()
     );
-    return String(f_date);
-  }
-
-  hubspotPropertyFormat(data) {
-    this.body = [];
-    const obj = {};
-    data.forEach((element) => {
-      if (element.email !== undefined) {
-        let temp_arr = [
-          {
-            property: "last_used",
-            value: this.getDateFormat(element.yesterday_exported),
-          },
-          {
-            property: "previously_used",
-            value: this.getDateFormat(element.previously_exported),
-          },
-        ];
-        obj["email"] = element.email;
-        obj["properties"] = temp_arr;
-        this.body.push(obj);
-      }
-    });
-    return this.body;
+    return Number(f_date);
   }
 }
