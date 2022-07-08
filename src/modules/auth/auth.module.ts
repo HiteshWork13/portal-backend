@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_CONST } from 'src/constants';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AccountEntity } from 'src/entities/account.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity]),
+    TypeOrmModule.forFeature([AccountEntity]),
     SharedModule
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],

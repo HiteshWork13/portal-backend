@@ -64,6 +64,9 @@ export class AccountEntity {
     @Column({ default: true })
     emailverified: Boolean;
 
+    @Column({ default: true })
+    login: Boolean;
+
     @Column({ collation: "default", nullable: true })
     verificationtoken: string;
 
@@ -164,5 +167,10 @@ export class AccountEntity {
     @BeforeInsert()
     async hashPassword() {
         this.password = await bcrypt.hash(this.password, 8);
+        console.log("this.password", this.password);
+    }
+
+    async validatePassword(password: string): Promise<boolean> {
+        return bcrypt.compare(password, this.password);
     }
 }
