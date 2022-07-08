@@ -11,6 +11,7 @@ import { DocumentModule } from './modules/document/document.module';
 import { DeviceModule } from './modules/device/device.module';
 import { HistoryExportModule } from './modules/history-export/history-export.module';
 import { PackageModule } from './modules/package/package.module';
+import { HistoryExportDrModule } from './modules/history-export-dr/history-export-dr.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -33,7 +34,8 @@ import { PackageModule } from './modules/package/package.module';
     DocumentModule,
     DeviceModule,
     HistoryExportModule,
-    PackageModule
+    PackageModule,
+    HistoryExportDrModule
   ],
   controllers: [AppController],
   providers: [AppService],
