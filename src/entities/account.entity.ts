@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { AdminEntity } from "./admin.entity";
 import * as bcrypt from 'bcrypt';
 import { PODocumentsEntity } from "./documents.entity";
@@ -167,7 +167,14 @@ export class AccountEntity {
     @BeforeInsert()
     async hashPassword() {
         this.password = await bcrypt.hash(this.password, 8);
-        console.log("this.password", this.password);
+    }
+
+    @BeforeUpdate()
+    async updatePassword() {
+        if (this.password) {
+            this.password = await bcrypt.hash(this.password, 8);
+            console.log('this.password: ', this.password);
+        }
     }
 
     async validatePassword(password: string): Promise<boolean> {

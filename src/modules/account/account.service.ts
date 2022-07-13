@@ -208,7 +208,8 @@ export class AccountService {
     }
 
     updateAccountQuery(id, body) {
-        return this.Account.update({ id }, body)
+        const admin: any = this.Account.create(body);
+        return this.Account.update({ id }, admin);
     }
 
     deleteAccountQuery(id) {
